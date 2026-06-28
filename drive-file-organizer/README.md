@@ -130,7 +130,7 @@ The complete workflow as it appears in the n8n editor, showing the Switch node's
 
 > **`images/google_sheet.png`**
 >
-> ![Google Sheets Log](images/google_sheet.png)
+> ![Google Sheets Log](images/google-sheet.png)
 
 The `File Organizer Logs` spreadsheet, capturing a live execution record. Each row represents one processed file and includes the timestamp, original file name, detected extension, and destination status.
 
@@ -140,7 +140,7 @@ The `File Organizer Logs` spreadsheet, capturing a live execution record. Each r
 
 > **`images/email_alert.png`**
 >
-> ![Email Notification](images/email_alert.png)
+> ![Email Notification](images/email-alert.png)
 
 A live example of the administrator notification. The email displays the "CORE AUTOMATION ENGINE" status badge, a confirmation heading, and a structured table with the file name, extension badge, and a green pipeline route confirmation.
 
@@ -244,13 +244,13 @@ The current workflow handles four file types across a single monitored folder. T
 
 ```
 n8n-workflows/
-└── Drive-File-Organizer/
-    ├── Drive-File-Organizer.json   # Exported n8n workflow (importable directly)
+└── drive-file-organizer/
+    ├── drive-file-organizer.json   # Exported n8n workflow (importable directly)
     ├── README.md
     └── images/
         ├── workflow.png            # n8n editor screenshot
-        ├── google_sheet.png        # Google Sheets audit log screenshot
-        └── email_alert.png         # Gmail notification screenshot
+        ├── google-sheet.png        # Google Sheets audit log screenshot
+        └── email-alert.png         # Gmail notification screenshot
 ```
 
 To deploy: import `Drive-File-Organizer.json` into your n8n instance, connect Google Drive, Google Sheets, and Gmail credentials, update the destination folder IDs in the Switch node rules, and activate. The workflow begins organizing uploads immediately.
