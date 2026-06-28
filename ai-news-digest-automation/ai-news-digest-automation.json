@@ -1,0 +1,405 @@
+{
+  "name": "AI News Digest Automation",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        464,
+        112
+      ],
+      "id": "fb914fc4-891e-44c6-8bec-996f0dfae81c",
+      "name": "END"
+    },
+    {
+      "parameters": {
+        "url": "https://api.rss2json.com/v1/api.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "rss_url",
+              "value": "https://news.google.com/rss/search?q=artificial+intelligence&hl=en-IN&gl=IN&ceid=IN:en"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -560,
+        112
+      ],
+      "id": "97780aab-0da9-4c9b-8792-75bdb975bf83",
+      "name": "Fetch Industry News"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 2000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        224
+      ],
+      "id": "bd7e7fae-d6b0-444d-9172-ef66e69cb0df",
+      "name": "AI",
+      "credentials": {
+        "openRouterApi": {
+          "id": "your-openrouter-api-credentials-id",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Initialize an empty string to accumulate the clean HTML article rows\nlet newsletterHtml = '';\n\n// 2. Loop through every single row object returned by your Notion node\nfor (const item of $input.all()) {\n  try {\n    // Directly target the flat property keys revealed in your n8n input mapping\n    const title = item.json.property_title || 'Untitled Article';\n    const summary = item.json.property_news_summary || 'No summary available.';\n    const link = item.json.property_url || '#';\n\n    // 3. Stack the HTML layout block for this specific news piece\n    newsletterHtml += `\n    <div style=\"margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0;\">\n      <h3 style=\"margin: 0 0 10px 0; color: #1a202c; font-size: 18px; font-weight: 600; line-height: 1.4;\">\n        🔔 ${title}\n      </h3>\n      <div style=\"color: #4a5568; font-size: 14px; white-space: pre-line; margin-bottom: 12px; line-height: 1.6;\">\n        ${summary}\n      </div>\n      <a href=\"${link}\" target=\"_blank\" style=\"color: #4f46e5; font-size: 13px; text-decoration: none; font-weight: 700; display: inline-block;\">\n        Read Original Article &rarr;\n      </a>\n    </div>\n    `;\n  } catch (error) {\n    // Skip any broken item loops gracefully to avoid breaking the entire digest summary\n    continue;\n  }\n}\n\n// 4. Verification fallback if the database filter returned zero results\nif (!newsletterHtml) {\n  newsletterHtml = '<p style=\"color: #718096; font-style: italic; text-align: center; padding: 20px;\">No new industry developments logged over the last 24 hours.</p>';\n}\n\n// 5. Package and return the payload cleanly to the email dispatcher\nreturn [{\n  json: {\n    html: newsletterHtml\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        432
+      ],
+      "id": "fac803f0-5d5c-4d4b-9a6c-ce90e7d085f8",
+      "name": "Format Articles into HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items from the HTTP Request node using n8n's modern syntax\nfor (const item of $input.all()) {\n    // Grab the raw HTML data safely\n    const rawHtml = item.json.data || \"\";\n    \n    if (rawHtml) {\n        // Step 1: Remove all <script> and <style> blocks along with their contents\n        let text = rawHtml.replace(/<(script|style)[^>]*>[\\s\\S]*?<\\/\\1>/gi, '');\n        \n        // Step 2: Strip out all remaining HTML tags (like <p>, <a>, <div>)\n        text = text.replace(/<[^>]+>/g, ' ');\n        \n        // Step 3: Clean up messy whitespace, tabs, and duplicate empty lines\n        const cleanText = text.replace(/\\s+/g, ' ').trim();\n        \n        // Step 4: Create a new field to hold our perfectly clean text\n        item.json.clean_article_text = cleanText;\n    } else {\n        item.json.clean_article_text = \"No content to parse.\";\n    }\n}\n\n// Output the modified data to the next node\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        112
+      ],
+      "id": "fcf40b77-65a4-455a-9b5a-038972ce4c26",
+      "name": "Normalize News Data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert executive research assistant. Summarize the following news story based on its headline title and reference data.\n\n### Constraints:\n1. Tone must be professional, objective, and corporate-grade. No conversational filler.\n2. Provide a 2-sentence maximum high-level summary explaining the significance of this news development.\n3. Extract exactly 3 professional bullet points predicting the potential industry impact, market changes, or regulatory results.\n\n### Input Data:\nTitle: {{ $('Every 4 Hours Trigger').item.json.title }}\nReference Meta: {{ $('Every 4 Hours Trigger').item.json.link }}\n\n### Output Format:\n**Summary**: [Insert 2-sentence summary here]\n**Key Takeaways**:\n- [Takeaway 1]\n- [Takeaway 2]\n- [Takeaway 3]",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -112,
+        0
+      ],
+      "id": "0d92f2f3-c6be-48c5-85de-718a4bebed62",
+      "name": "Generate AI News Summary"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "3874cf20-85cf-80bb-afac-d13c9be3686d",
+          "mode": "list",
+          "cachedResultName": "AI News Repository",
+          "cachedResultUrl": "https://app.notion.com/p/your-database-id"
+        },
+        "title": "News by AI",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Title|rich_text",
+              "textContent": "={{ $('Every 4 Hours Trigger').item.json.title }}"
+            },
+            {
+              "key": "URL|url",
+              "urlValue": "={{ $('Every 4 Hours Trigger').item.json.link }}"
+            },
+            {
+              "key": "News Summary|rich_text",
+              "textContent": "={{ $json.output }}"
+            },
+            {
+              "key": "Created time|date",
+              "date": "={{ $now }}",
+              "timezone": "Asia/Kolkata"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        112
+      ],
+      "id": "07fa0ebf-2d26-416b-b723-6ac25cb5caee",
+      "name": "Save Articles to Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "your-notion-credentials-id",
+          "name": "n8n AI Summarizer Connection"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -784,
+        432
+      ],
+      "id": "131aaa32-019b-4d21-b888-0107fbd33fcc",
+      "name": "Daily 8 AM Digest Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "3874cf20-85cf-80bb-afac-d13c9be3686d",
+          "mode": "list",
+          "cachedResultName": "AI News Repository",
+          "cachedResultUrl": "https://app.notion.com/p/your-database-id"
+        },
+        "limit": 15,
+        "options": {
+          "downloadFiles": false,
+          "sort": {
+            "sortValue": [
+              {
+                "timestamp": true,
+                "key": "created_time",
+                "direction": "descending"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        432
+      ],
+      "id": "be22752b-f360-4c39-a3dd-58dbde1bf7a1",
+      "name": "Fetch Today's Articles",
+      "credentials": {
+        "notionApi": {
+          "id": "your-notion-credentials-id",
+          "name": "n8n AI Summarizer Connection"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=⚙️ Daily AI Intelligence Briefing — {{ $now.toFormat('MMMM dd, yyyy') }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Daily Market Intelligence</title>\n  <style>\n    body { \n      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; \n      color: #333333; \n      line-height: 1.6; \n      background-color: #f9fafb;\n      margin: 0;\n      padding: 0;\n    }\n    .email-wrapper {\n      width: 100%;\n      background-color: #f9fafb;\n      padding: 40px 0;\n    }\n    .container { \n      max-width: 600px; \n      margin: 0 auto; \n      background-color: #ffffff;\n      border: 1px solid #e1e4e8; \n      border-radius: 8px; \n      overflow: hidden;\n      box-shadow: 0 4px 6px rgba(0,0,0,0.02);\n    }\n    .header { \n      background-color: #1a1a1a;\n      padding: 30px;\n      color: #ffffff;\n    }\n    .header h1 { \n      margin: 0; \n      font-size: 22px; \n      font-weight: 700;\n      letter-spacing: -0.5px;\n    }\n    .header p { \n      margin: 5px 0 0 0; \n      color: #a0aec0; \n      font-size: 14px; \n    }\n    .content { \n      padding: 30px;\n    }\n    .footer { \n      background-color: #f7fafc;\n      border-top: 1px solid #e2e8f0; \n      padding: 20px; \n      font-size: 12px; \n      color: #718096; \n      text-align: center; \n    }\n  </style>\n</head>\n<body>\n\n  <div class=\"email-wrapper\">\n    <div class=\"container\">\n      \n      <div class=\"header\">\n        <h1>📰 Automated Market Intelligence</h1>\n        <p>Your curated executive summary of latest industry developments.</p>\n      </div>\n\n      <div class=\"content\">\n        {{ $json.html }}\n      </div>\n\n      <div class=\"footer\">\n        <p>This automated briefing was generated and compiled by your operational AI engine.</p>\n        <p>Data Source: Notion Intelligence Hub • Synchronized Daily</p>\n      </div>\n\n    </div>\n  </div>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        432
+      ],
+      "id": "a8757fd1-33cd-4fa1-9eaa-5b728dcab902",
+      "name": "Send Daily AI News Digest",
+      "webhookId": "your-gmail-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst yesterday = new Date(now);\nyesterday.setDate(now.getDate() - 1);\n\nreturn $input.all().filter(item => {\n\n  const created = new Date(item.json.property_created_time.start);\n\n  return (\n    created >= yesterday &&\n    created < now \n  );\n\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        432
+      ],
+      "id": "c11d0906-8fce-46fc-99bb-7c85e1add199",
+      "name": "Filter Today's Articles"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 4
+            }
+          ]
+        },
+        "feedUrl": "https://openai.com/news/rss.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        112
+      ],
+      "id": "27b0204f-04b9-4545-8139-6c87a96689cc",
+      "name": "Every 4 Hours Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fetch Industry News": {
+      "main": [
+        [
+          {
+            "node": "Normalize News Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate AI News Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Articles into HTML": {
+      "main": [
+        [
+          {
+            "node": "Send Daily AI News Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize News Data": {
+      "main": [
+        [
+          {
+            "node": "Generate AI News Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI News Summary": {
+      "main": [
+        [
+          {
+            "node": "Save Articles to Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Articles to Notion": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 8 AM Digest Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today's Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Today's Articles": {
+      "main": [
+        [
+          {
+            "node": "Filter Today's Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Daily AI News Digest": {
+      "main": [
+        []
+      ]
+    },
+    "Filter Today's Articles": {
+      "main": [
+        [
+          {
+            "node": "Format Articles into HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 4 Hours Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Industry News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "4e8b65cd-20a8-4f47-a636-c1d0fcdb02cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
+  },
+  "nodeGroups": [],
+  "id": "OuTwbvU6cMeBrZH5",
+  "tags": []
+}
