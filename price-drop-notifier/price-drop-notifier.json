@@ -1,0 +1,325 @@
+{
+  "name": "Price-Drop-Notifier",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1600,
+        624
+      ],
+      "id": "b76a2ff9-d09b-4886-8b7d-9cd7c7d7afac",
+      "name": "Run Daily Check"
+    },
+    {
+      "parameters": {
+        "url": "https://share.google/MyProductPage",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1376,
+        624
+      ],
+      "id": "f742610f-567d-4274-a8a2-9e7560584ba5",
+      "name": "Fetch Product Page"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "Product_Price",
+              "cssSelector": ".mQzvxd b"
+            },
+            {
+              "key": "Product_Name",
+              "cssSelector": "div[data-attrid=\"product_title\"]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1152,
+        624
+      ],
+      "id": "5060df66-244c-4083-8aaf-a15ce4a398f4",
+      "name": "Extract Price",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "63d6d2ea-baab-4362-a7bd-98e267bd12e0",
+              "leftValue": "={{ $node[\"Fetch product Details\"].json.currentPrice }}",
+              "rightValue": "={{ 850 }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -480,
+        528
+      ],
+      "id": "782639b8-0f9d-4ee0-b484-72b043a25b41",
+      "name": "Price Below Threshold?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        528
+      ],
+      "id": "9fadc519-45b6-4a7a-acd3-1fa573d341d9",
+      "name": "END"
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=🚨 Price Drop Alert: {{ $json.productName }} is now ₹{{ $json.currentPrice }}!",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <style>\n    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f9fafb; margin: 0; padding: 20px; color: #1f2937; }\n    .card { max-width: 550px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }\n    .alert-badge { display: inline-block; background-color: #fef3c7; color: #d97706; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 12px; border-radius: 9999px; margin-bottom: 16px; }\n    h1 { font-size: 22px; font-weight: 700; line-height: 1.3; color: #111827; margin: 0 0 12px 0; }\n    p { font-size: 15px; line-height: 1.6; color: #4b5563; margin: 0 0 24px 0; }\n    .price-box { background-color: #f0fdf4; border: 1px dashed #bbf7d0; border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 28px; }\n    .price-label { font-size: 13px; color: #166534; text-transform: uppercase; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 4px; }\n    .price-value { font-size: 32px; font-weight: 800; color: #15803d; }\n    .btn { display: block; background-color: #2563eb; color: #ffffff !important; text-align: center; font-weight: 600; font-size: 15px; text-decoration: none; padding: 14px 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); transition: background-color 0.2s; }\n    .footer { text-align: center; margin-top: 24px; font-size: 12px; color: #9ca3af; }\n  </style>\n</head>\n<body>\n\n  <div class=\"card\">\n    <div class=\"alert-badge\">Price Drop Tracked</div>\n    <h1>Your target threshold has been met!</h1>\n    <p>Good news! The price for <strong>{{ $json.productName }}</strong> has dipped below your configured target threshold limits.</p>\n    \n    <div class=\"price-box\">\n      <div class=\"price-label\">Current Selling Price</div>\n      <div class=\"price-value\">₹{{ $json.currentPrice }}</div>\n    </div>\n\n    <a href=\"{{ $json.productUrl }}\" target=\"_blank\" class=\"btn\">View Product on Store</a>\n  </div>\n\n  <div class=\"footer\">\n    Automated tracking assistant via n8n • Checked just now\n  </div>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        528
+      ],
+      "id": "44e75b52-85ae-4cd8-acf6-f0d718ee11df",
+      "name": "Send Price Drop Alert Email",
+      "webhookId": "e5a655e2-5629-454d-8c63-202e7387d1f1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "Action Required: Price Tracker Node Failed Due to Layout Update.",
+        "emailType": "text",
+        "message": "Alert: The website structure changed or the product page failed to load. Please check the CSS selectors in the Extract Price node.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -704,
+        720
+      ],
+      "id": "58a14dce-ff53-4eb6-b2e9-dee6d76a3510",
+      "name": "Send Error Alert",
+      "webhookId": "20e497ac-9db0-4425-be3e-1fc426743baa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2bc15358-b6cd-456b-9641-11aec1483886",
+              "leftValue": "={{ $json.Product_Price }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "95983f8b-cca4-42f0-98bd-e1e7c8dffa90",
+              "leftValue": "={{ $json.Product_Name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -928,
+        624
+      ],
+      "id": "c6dcda86-4e3a-4bec-a9d3-a8fe2d3bb1c0",
+      "name": "Verify Data Exists"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the current price string from your input (e.g., \"₹799–₹1,199\")\nconst priceString = $input.item.json.Product_Price;\n\nif (!priceString) {\n  throw new Error(\"Could not find 'Product_Price' in the input data. Check your HTML node configuration.\");\n}\n\n// 2. Extract just the numbers. If it's a range, this grabs the first (lowest) price.\nconst match = priceString.match(/[0-9,]+/);\nif (!match) {\n  throw new Error(`Could not parse numbers out of price string: ${priceString}`);\n}\n\n// Remove commas if any (e.g., 1,199 -> 1199) and convert to a number\nconst currentPrice = parseFloat(match[0].replace(/,/g, ''));\n\n// 3. Retrieve the old price stored from the last run\nconst staticData = $getWorkflowStaticData('global');\nconst oldPrice = staticData.savedPrice || currentPrice; \n\n// 4. Update the permanent memory with the new price for next time\nstaticData.savedPrice = currentPrice;\n\n// 5. Pass only the current price and identifiers forward\nreturn [{\n  json: {\n    productUrl: $node[\"Fetch Product Page\"].parameter[\"url\"],\n    productName: $input.item.json.Product_Name,\n    currentPrice: currentPrice\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -704,
+        528
+      ],
+      "id": "300643a1-f683-4e7a-bf64-eef218348de9",
+      "name": "Fetch product Details"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Run Daily Check": {
+      "main": [
+        [
+          {
+            "node": "Fetch Product Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Product Page": {
+      "main": [
+        [
+          {
+            "node": "Extract Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Price": {
+      "main": [
+        [
+          {
+            "node": "Verify Data Exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Price Below Threshold?": {
+      "main": [
+        [
+          {
+            "node": "Send Price Drop Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Price Drop Alert Email": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Data Exists": {
+      "main": [
+        [
+          {
+            "node": "Fetch product Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Error Alert": {
+      "main": [
+        []
+      ]
+    },
+    "Fetch product Details": {
+      "main": [
+        [
+          {
+            "node": "Price Below Threshold?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "020be633-1b92-4811-bfc1-6ab653df8b3f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
+  },
+  "nodeGroups": [],
+  "id": "tC6FDHJi4toQJp0i",
+  "tags": []
+}
