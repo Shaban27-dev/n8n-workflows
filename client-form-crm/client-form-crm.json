@@ -1,0 +1,456 @@
+{
+  "name": "Client Form → CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "=your-form-id-here"
+      },
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -528,
+        208
+      ],
+      "id": "5250aa7c-2b01-46b1-97b5-fd973d3aa99b",
+      "name": "Catch New Lead",
+      "webhookId": "db0719bb-d43e-438b-9cb2-78768c90f0e8",
+      "credentials": {
+        "typeformApi": {
+          "id": "your-typeform-credentials-id-here",
+          "name": "Typeform account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  // 1. Extract raw values from the previous node and clean up spaces\n  const rawName = (item.json[\"Name\"] || \"\").trim();\n  const rawEmail = (item.json[\"Email\"] || \"\").trim();\n  const rawDescription = (item.json[\"Project Description\"] || \"\").trim();\n  const rawBudget = (item.json[\"Budget\"] || \"\").trim();\n  const rawStartDate = (item.json[\"Start Date\"] || \"\").trim();\n\n  // 2. Set explicit \"Missing\" text labels if any value is empty\n  const name = rawName || \"Name Missing\";\n  const email = rawEmail || \"Email Missing\";\n  const description = rawDescription || \"Project Description Missing\";\n  const budgetDisplay = rawBudget || \"Budget Missing\";\n  const startDate = rawStartDate || \"Start Date Missing\";\n\n  // 3. Extract a clean numerical value from the budget string\n  const budgetMatch = budgetDisplay.match(/\\d+/);\n  const numericBudget = budgetMatch ? parseInt(budgetMatch[0], 10) : 0;\n\n  // 4. Lead Scoring & Routing Logic\n  let status = \"Low Budget\"; // Default baseline status\n\n  // Flags \"Missing Info\" if ANY field is empty OR description is under 10 characters\n  if (!rawName || !rawEmail || !rawDescription || rawDescription.length < 10 || !rawBudget || !rawStartDate) {\n    status = \"Missing Info\";\n  } else if (numericBudget >= 5000) {\n    status = \"High Budget\";\n  }\n\n  // 5. Build clean, explicit keys matching your Notion Database columns exactly\n  item.json.Name = name;\n  item.json.Email = email;\n  item.json[\"Project Description\"] = description;\n  item.json[\"Target Start Date\"] = startDate;\n  item.json[\"Raw Budget\"] = budgetDisplay;\n  item.json[\"Number Budget\"] = numericBudget;\n  item.json.Status = status;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        208
+      ],
+      "id": "3eeb7b40-ce7c-4d1e-b303-9b036da93e31",
+      "name": "Evaluate Lead Score"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "3884cf20-85cf-8077-ad6f-f6cb3f5079c6",
+          "mode": "list",
+          "cachedResultName": "CRM Log Lead",
+          "cachedResultUrl": "https://app.notion.com/p/your-database-id-here"
+        },
+        "title": "Client Leads",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{ $json.Name }}"
+            },
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json.Email }}"
+            },
+            {
+              "key": "Project Description|rich_text",
+              "textContent": "={{ $json[\"Project Description\"] }}"
+            },
+            {
+              "key": "Target Start Date|date",
+              "includeTime": false,
+              "date": "={{ $json[\"Target Start Date\"] }}",
+              "timezone": "Asia/Kolkata"
+            },
+            {
+              "key": "Raw Budget|rich_text",
+              "textContent": "={{ $json[\"Raw Budget\"] }}"
+            },
+            {
+              "key": "Numeric Budget|number",
+              "numberValue": "={{ $json[\"Number Budget\"] }}"
+            },
+            {
+              "key": "Status|rich_text",
+              "textContent": "={{ $json.Status }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        208
+      ],
+      "id": "07ee6681-653b-4922-9b15-9ac7e746705f",
+      "name": "Log Lead to CRM",
+      "credentials": {
+        "notionApi": {
+          "id": "your-notion-credentials-id-here",
+          "name": "Client Form → CRM"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=Re: Your project inquiry with Hashnab Automatio",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>Project Inquiry Update</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f6f8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333; -webkit-font-smoothing: antialiased;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f4f6f8; padding: 40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden;\">\n          \n          <tr>\n            <td style=\"background-color: #1a2530; padding: 25px 40px; text-align: left;\">\n              <span style=\"color: #ffffff; font-size: 18px; font-weight: 700; letter-spacing: 1px;\">HASHNAB AUTOMATION</span>\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"padding: 40px;\">\n              <p style=\"font-size: 16px; line-height: 1.6; margin-top: 0; margin-bottom: 20px; color: #1a2530;\">\n                Hi {{ $json.name }},\n              </p>\n              \n              <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 20px; color: #4a5568;\">\n                Thank you so much for reaching out and sharing the details of your project! We truly appreciate you taking the time to consider us for this initiative.\n              </p>\n              \n              <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 24px; color: #4a5568;\">\n                After reviewing your goals and estimated budget, it looks like this project falls just below our current minimum engagement threshold for custom developments. To ensure our clients get maximum ROI, our targeted build pipelines typically begin at <strong style=\"color: #1a2530;\">$5,000</strong>.\n              </p>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f7fafc; border-left: 4px solid #3182ce; border-radius: 4px; margin-bottom: 24px;\">\n                <tr>\n                  <td style=\"padding: 20px;\">\n                    <h4 style=\"margin: 0 0 8px 0; font-size: 13px; color: #2b6cb0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;\">Our Recommendation</h4>\n                    <p style=\"margin: 0; font-size: 14px; line-height: 1.5; color: #2d3748;\">\n                      Because we want to point you in the right direction, we highly recommend checking out platforms like <strong>Upwork</strong> or vetted template marketplaces. These are fantastic options for launching projects successfully within your current budget tier!\n                    </p>\n                  </td>\n                </tr>\n              </table>\n              \n              <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 32px; color: #4a5568;\">\n                We wish you the absolute best of luck with your project launch, and hope our paths cross again in the future as your business grows.\n              </p>\n              \n              <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 24px;\">\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <p style=\"margin: 0; font-size: 15px; color: #4a5568;\">Warm regards,</p>\n                    <p style=\"margin: 6px 0 2px 0; font-size: 16px; font-weight: 700; color: #1a2530;\">Shaban Alam</p>\n                    <p style=\"margin: 0; font-size: 13px; color: #718096;\">Founder &amp; Principal Automation Architect</p>\n                    <p style=\"margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: #3182ce;\">Hashnab Automation</p>\n                  </td>\n                </tr>\n              </table>\n              \n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"background-color: #f7fafc; padding: 20px 40px; text-align: center; border-top: 1px solid #edf2f7;\">\n              <p style=\"margin: 0; font-size: 12px; color: #a0aec0;\">\n                This is an automated operational transmission from Hashnab Automation.\n              </p>\n            </td>\n          </tr>\n          \n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        16
+      ],
+      "id": "cfa3152c-b55e-4f08-a2ae-8c81fb0c8180",
+      "name": "Email: Polite Redirect",
+      "webhookId": "your-gmail-webhook-id-here",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credentials-id-here",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=youremail@gmail.com",
+        "subject": "=Quick question regarding your project inquiry - Hashnab Automation",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>Project Details Request</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #334155; -webkit-font-smoothing: antialiased;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f8fafc; padding: 40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03); overflow: hidden; border: 1px solid #e2e8f0;\">\n          \n          <tr>\n            <td style=\"background-color: #0f172a; height: 6px; font-size: 0; line-height: 0;\">&nbsp;</td>\n          </tr>\n          \n          <tr>\n            <td style=\"padding: 40px 35px;\">\n              \n              <p style=\"margin: 0 0 20px 0; font-size: 16px; line-height: 1.5; color: #0f172a; font-weight: 600;\">\n                Hi {{ $json.name }},\n              </p>\n              \n              <p style=\"margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #334155;\">\n                Thanks for submitting your inquiry via our client portal! We are incredibly excited about the prospect of helping you optimize and accelerate your business operations.\n              </p>\n              \n              <p style=\"margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #334155;\">\n                Our engineering team reviewed your submission, but we noticed we are missing a few crucial details required to accurately evaluate your infrastructure requirements and scope out a highly accurate custom quote for you.\n              </p>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f1f5f9; border-radius: 8px; margin-bottom: 28px;\">\n                <tr>\n                  <td style=\"padding: 25px;\">\n                    <p style=\"margin: 0 0 14px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569;\">\n                      Could you please clarify a bit more context regarding:\n                    </p>\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                      <tr>\n                        <td valign=\"top\" style=\"padding: 6px 10px 6px 0; font-size: 15px; color: #0f172a; font-weight: bold;\">•</td>\n                        <td style=\"padding: 6px 0; font-size: 14px; line-height: 1.5; color: #334155;\">\n                          <strong>The core workflow bottlenecks</strong> you are trying to solve right now.\n                        </td>\n                      </tr>\n                      <tr>\n                        <td valign=\"top\" style=\"padding: 6px 10px 6px 0; font-size: 15px; color: #0f172a; font-weight: bold;\">•</td>\n                        <td style=\"padding: 6px 0; font-size: 14px; line-height: 1.5; color: #334155;\">\n                          <strong>Any specific software tools</strong>, platforms, or internal databases you need seamlessly integrated.\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n              </table>\n              \n              <p style=\"margin: 0 0 32px 0; font-size: 15px; line-height: 1.6; color: #334155;\">\n                Simply <strong>reply directly to this email</strong> with your thoughts! Once we catch those additional details, we will instantly pass them to engineering and coordinate the next steps to get your discovery call locked into the schedule.\n              </p>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-top: 1px solid #e2e8f0; margin-bottom: 24px;\">\n                <tr><td></td></tr>\n              </table>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <p style=\"margin: 0 0 4px 0; font-size: 15px; color: #334155; font-weight: 500;\">Best regards,</p>\n                    <p style=\"margin: 0 0 2px 0; font-size: 16px; color: #0f172a; font-weight: 700;\">Shaban</p>\n                    <p style=\"margin: 0; font-size: 13px; color: #64748b; line-height: 1.4;\">\n                      Founder &amp; Principal Automation Architect <br>\n                      <span style=\"color: #0f172a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;\">Nexus Automation</span>\n                    </p>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"background-color: #f8fafc; padding: 20px 35px; text-align: center; border-top: 1px solid #e2e8f0;\">\n              <p style=\"margin: 0; font-size: 11px; color: #94a3b8;\">\n                This inquiry response process is protected and managed via Hashnab Secure Engineering Pipelines.\n              </p>\n            </td>\n          </tr>\n          \n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        400
+      ],
+      "id": "8ecb3cca-0eb1-4c31-becf-9948282c6b6c",
+      "name": "Email: Request Details",
+      "webhookId": "your-gmail-webhook-id-here",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credentials-id-here",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        816,
+        208
+      ],
+      "id": "32cdea77-70ea-4d3d-8d7b-0130b5e7e67b",
+      "name": "END"
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=High Client Lead Alert!🔥 [High-Value Lead] {{ $json.name }} | Budget: {{ $json.property_raw_budget }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>High Value Lead Briefing</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #334155; -webkit-font-smoothing: antialiased;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f8fafc; padding: 30px 15px;\">\n    <tr>\n      <td align=\"center\">\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width: 650px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e2e8f0;\">\n          \n          <tr>\n            <td style=\"background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); padding: 25px 35px; text-align: left;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <span style=\"background-color: rgba(255, 255, 255, 0.2); color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; vertical-align: middle;\">Priority 1</span>\n                    <h2 style=\"color: #ffffff; margin: 10px 0 0 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;\">🔥 New High-Value Lead Captured</h2>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"padding: 35px;\">\n              \n              <h3 style=\"margin: 0 0 15px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;\">Prospect Overview</h3>\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f1f5f9; border-radius: 8px; margin-bottom: 30px; padding: 20px;\">\n                <tr>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #475569;\" width=\"35%\"><strong>Prospect Name:</strong></td>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #0f172a;\">{{ $json.name }}</td>\n                </tr>\n                <tr>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #475569;\"><strong>Email Address:</strong></td>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #4f46e5; font-weight: 600;\"><a href=\"mailto:{{ $json.property_email }}\" style=\"color: #4f46e5; text-decoration: none;\">{{ $json.property_email }}</a></td>\n                </tr>\n                <tr>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #475569;\"><strong>Stated Budget Tier:</strong></td>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #16a34a; font-weight: 700;\">💰 {{ $json.property_raw_budget }}</td>\n                </tr>\n                <tr>\n                  <td style=\"font-size: 14px; color: #475569;\"><strong>Target Launch Date:</strong></td>\n                  <td style=\"font-size: 14px; color: #0f172a;\">📅 {{ $json.property_target_start_date.start }}</td>\n                </tr>\n              </table>\n\n              <h3 style=\"margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;\">Project Scope Summary</h3>\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-left: 4px solid #4f46e5; background-color: #fafafa; margin-bottom: 30px;\">\n                <tr>\n                  <td style=\"padding: 15px 20px; font-size: 14px; line-height: 1.6; color: #334155; font-style: italic;\">\n                    \"{{ $json.property_project_description }}\"\n                  </td>\n                </tr>\n              </table>\n\n              <h3 style=\"margin: 0 0 15px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;\">Required Next Steps (SLA: 4 Hours)</h3>\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-bottom: 35px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px;\">\n                <tr>\n                  <td style=\"padding: 6px 0; font-size: 13px; color: #475569;\">⏹️ <strong>Step 1:</strong> Review the automated discovery payload logged in your CRM.</td>\n                </tr>\n                <tr>\n                  <td style=\"padding: 6px 0; font-size: 13px; color: #475569;\">⏹️ <strong>Step 2:</strong> Audit the prospect's corporate domain context via LinkedIn/Google.</td>\n                </tr>\n                <tr>\n                  <td style=\"padding: 6px 0; font-size: 13px; color: #475569;\">⏹️ <strong>Step 3:</strong> Draft a high-touch personalized follow-up pitch to lock in a face-to-face discovery call.</td>\n                </tr>\n              </table>\n\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td align=\"center\">\n                    <a href=\"{{ $json.url }}\" target=\"_blank\" style=\"display: inline-block; background-color: #4f46e5; color: #ffffff; font-weight: 600; font-size: 15px; padding: 14px 30px; text-decoration: none; border-radius: 6px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); text-transform: uppercase; letter-spacing: 0.5px;\">\n                      Open Record In CRM →\n                    </a>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"background-color: #f8fafc; padding: 20px 35px; text-align: center; border-top: 1px solid #e2e8f0;\">\n              <p style=\"margin: 0; font-size: 11px; color: #94a3b8; letter-spacing: 0.3px;\">\n                Engineered via Hashnab Automation Systems Infrastructure.\n              </p>\n            </td>\n          </tr>\n          \n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        208
+      ],
+      "id": "fa313bf0-15fc-49a3-99d7-4563889f9b86",
+      "name": "Instant Alert",
+      "webhookId": "your-gmail-webhook-id-here",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credentials-id-here",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Evaluate Lead Score').item.json.Status }}",
+                    "rightValue": "Low Budget",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9de9a6a7-87a1-45dc-b865-a39c0291daa3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Low Budget"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "58461dde-0fd2-4eaa-adc4-895948a6ca22",
+                    "leftValue": "={{ $('Evaluate Lead Score').item.json.Status }}",
+                    "rightValue": "High Budget",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High Budget"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "27499502-f77f-40ab-baf7-f7621921d75f",
+                    "leftValue": "={{ $('Evaluate Lead Score').item.json.Status }}",
+                    "rightValue": "Missing Info",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Missing Info"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        192
+      ],
+      "id": "68f926f5-1ebd-486d-a949-679ef2acddb5",
+      "name": "Route Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1140c4e7-4254-42fb-82ea-030742794860",
+              "name": "Name",
+              "value": "={{ $json[\"What is your Name?\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "be83f86f-8f38-42db-a563-01e8d0ca3385",
+              "name": "Email",
+              "value": "={{ $json[\"What’s your email address?\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "58721626-62fa-4009-864b-5945bf3664db",
+              "name": "Project Description",
+              "value": "={{ $json[\"Please describe your project briefly.\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "ef355500-8da0-4d93-8baa-ec4f2b4ea7cc",
+              "name": "Budget",
+              "value": "={{ $json[\"What is your budget for this project?\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "1c37acb0-1c41-4551-b190-2d8ee398abcb",
+              "name": "Start Date",
+              "value": "={{ $json[\"When are you looking to start?\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        208
+      ],
+      "id": "603f7c7b-372e-4739-be4d-d28464b44f9c",
+      "name": "Simplify Client Details"
+    }
+  ],
+  "pinData": {
+    "Catch New Lead": [
+      {
+        "json": {
+          "What is your Name?": "David High",
+          "What’s your email address?": "david@highbudget.com",
+          "Please describe your project briefly.": "We need an enterprise-grade AI chatbot system integrated into our global customer service desk to reduce manual ticket response times.",
+          "What is your budget for this project?": "$5000 - $9999",
+          "When are you looking to start?": "2026-06-30"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Catch New Lead": {
+      "main": [
+        [
+          {
+            "node": "Simplify Client Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Lead Score": {
+      "main": [
+        [
+          {
+            "node": "Log Lead to CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Lead to CRM": {
+      "main": [
+        [
+          {
+            "node": "Route Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Polite Redirect": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Request Details": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instant Alert": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Lead": {
+      "main": [
+        [
+          {
+            "node": "Email: Polite Redirect",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instant Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email: Request Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simplify Client Details": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Lead Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d663173f-1b52-415b-8191-da7357687d02",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
+  },
+  "nodeGroups": [],
+  "id": "K3HHenb13GmXbkbO",
+  "tags": []
+}
