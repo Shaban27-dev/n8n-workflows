@@ -224,8 +224,8 @@ price-drop-notifier/
 ├── README.md
 ├── screenshots/
 │   ├── workflow.png        # n8n editor screenshot
-│   └── email-alert.png     # Gmail notification screenshot
-
+│   ├── email-alert.png     # Gmail notification screenshot
+|   └── LECENSE
 ```
 
 To use this workflow: import `workflow.json` into your n8n instance, connect your Gmail credentials, update the target URL and price threshold in the IF node, and activate.
