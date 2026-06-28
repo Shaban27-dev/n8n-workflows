@@ -47,9 +47,9 @@ The engineering philosophy that runs through every project here:
 
 | Workflow | Problem Solved | Technologies | Docs |
 |---|---|---|---|
-| 🔔 [Price Drop Notifier](./Price-Drop-Notifier/) | Monitors a product page daily and sends an email alert the moment the price drops to a configured target | n8n · HTTP Request · HTML Extraction · IF · Gmail | [README](./Price-Drop-Notifier/README.md) |
-| ⚙️ [Drive File Organizer](./Drive-File-Organizer/) | Detects new Google Drive uploads, classifies them by extension, moves them to the correct folder, logs every action to Sheets, and sends a confirmation email | n8n · Google Drive · Switch · JS Code · Google Sheets · Gmail | [README](./Drive-File-Organizer/README.md) |
-| 📋 [Client Form → CRM](./Client-Form-CRM/) | Captures client inquiries from Typeform, scores leads against business rules, logs every submission to Notion, and routes prospects into three distinct automated email paths | n8n · Typeform · Set · JS Code · Notion · Switch · Gmail | [README](./Client-Form-CRM/README.md) |
+| 🔔 [Price Drop Notifier](./price-drop-notifier/) | Monitors a product page daily and sends an email alert the moment the price drops to a configured target | n8n · HTTP Request · HTML Extraction · IF · Gmail | [README](./price-drop-notifier/README.md) |
+| ⚙️ [Drive File Organizer](./drive-file-organizer/) | Detects new Google Drive uploads, classifies them by extension, moves them to the correct folder, logs every action to Sheets, and sends a confirmation email | n8n · Google Drive · Switch · JS Code · Google Sheets · Gmail | [README](./drive-file-organizer/README.md) |
+| 📋 [Client Form → CRM](./client-form-crm/) | Captures client inquiries from Typeform, scores leads against business rules, logs every submission to Notion, and routes prospects into three distinct automated email paths | n8n · Typeform · Set · JS Code · Notion · Switch · Gmail | [README](./client-form-crm/README.md) |
 | 🔄 *Coming soon* | AI lead enrichment, invoice OCR processing, multi-channel job alerts | — | — |
 
 ---
@@ -65,8 +65,8 @@ n8n-workflows/
 │   ├── repo-overview.png
 │   └── sheets-log.png
 │
-├── Client-Form-CRM/
-│   ├── Client-Form-CRM.json        # Importable n8n workflow
+├── client-form-crm/
+│   ├── client-form-crm.json        # Importable n8n workflow
 │   ├── README.md
 │   └── images/
 │       ├── workflow.png
@@ -75,20 +75,20 @@ n8n-workflows/
 │       ├── low-budget-email.png
 │       └── missing-info-email.png
 │
-├── Drive-File-Organizer/
-│   ├── Drive-File-Organizer.json   # Importable n8n workflow
+├── drive-file-organizer/
+│   ├── drive-file-organizer.json   # Importable n8n workflow
 │   ├── README.md
 │   └── images/
 │       ├── workflow.png
-│       ├── email_alert.png
-│       └── google_sheet.png
+│       ├── email-alert.png
+│       └── google-sheet.png
 │
-├── Price-Drop-Notifier/
-│   ├── Price-Drop-Notifier.json    # Importable n8n workflow
+├── price-drop-notifier/
+│   ├── price-drop-notifier.json    # Importable n8n workflow
 │   ├── README.md
 │   └── images/
 │       ├── workflow.png
-│       └── email_alert.png
+│       └── email-alert.png
 │
 ├── LICENSE
 └── README.md
