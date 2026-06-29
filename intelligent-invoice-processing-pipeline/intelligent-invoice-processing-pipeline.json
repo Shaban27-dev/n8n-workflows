@@ -1,0 +1,792 @@
+{
+  "name": "Intelligent Invoice Processing Pipeline",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        112
+      ],
+      "id": "47a477a0-8e55-490d-ad7f-5ea33f39a08c",
+      "name": "END"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        112
+      ],
+      "id": "ee3520b0-0752-441d-827c-45781050c644",
+      "name": "Download Email Attachments",
+      "webhookId": "your-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-oauth2-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=Invoice {{ $json['Invoice Number '] }} Processed Successfully — Hashnab Automation",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Invoice Processed Successfully</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f6f8; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;\">\n\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #f4f6f8; padding: 40px 10px;\">\n    <tr>\n      <td align=\"center\">\n        \n        <table width=\"100%\" class=\"content-table\" style=\"max-width: 600px; background-color: #ffffff; border-collapse: separate; border-radius: 8px; border: 1px solid #e1e4e8; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); overflow: hidden;\" cellpadding=\"0\" cellspacing=\"0\">\n          \n          <tr>\n            <td style=\"background-color: #1e293b; padding: 32px 24px; text-align: center;\">\n              <span style=\"background-color: #10b981; color: #ffffff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 12px;\">Automated Pipeline</span>\n              <h1 style=\"color: #ffffff; font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.5px;\">Invoice Processed Successfully</h1>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 32px 24px;\">\n              <p style=\"margin: 0 0 16px 0; font-size: 15px; line-height: 24px; color: #334155;\">Hi Team,</p>\n              <p style=\"margin: 0 0 24px 0; font-size: 15px; line-height: 24px; color: #475569;\">\n                An inbound invoice has successfully passed automated compliance verification and has been appended to the central tracking sheet.\n              </p>\n\n              <div style=\"background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px; margin-bottom: 24px;\">\n                <h3 style=\"margin: 0 0 16px 0; font-size: 14px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px;\">Extraction Details</h3>\n                \n                <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"font-size: 14px;\">\n                  <tr>\n                    <td style=\"padding: 10px 0; color: #64748b; border-bottom: 1px solid #edf2f7; font-weight: 500;\">Invoice Number</td>\n                    <td style=\"padding: 10px 0; color: #0f172a; border-bottom: 1px solid #edf2f7; text-align: right; font-weight: 600;\">{{ $json['Invoice Number '] }}</td>\n                  </tr>\n                  <tr>\n                    <td style=\"padding: 10px 0; color: #64748b; border-bottom: 1px solid #edf2f7; font-weight: 500;\">Client Name</td>\n                    <td style=\"padding: 10px 0; color: #0f172a; border-bottom: 1px solid #edf2f7; text-align: right; font-weight: 600;\">{{ $json['Client Name'] }}</td>\n                  </tr>\n                  <tr>\n                    <td style=\"padding: 10px 0; color: #64748b; border-bottom: 1px solid #edf2f7; font-weight: 500;\">Invoice Date</td>\n                    <td style=\"padding: 10px 0; color: #0f172a; border-bottom: 1px solid #edf2f7; text-align: right; font-weight: 500;\">{{ $json['Invoice Date'] }}</td>\n                  </tr>\n                  <tr>\n                    <td style=\"padding: 10px 0; color: #64748b; border-bottom: 1px solid #edf2f7; font-weight: 500;\">Due Date</td>\n                    <td style=\"padding: 10px 0; color: #0f172a; border-bottom: 1px solid #edf2f7; text-align: right; font-weight: 500;\">{{ $json['Due Date'] }}</td>\n                  </tr>\n                  <tr>\n                    <td style=\"padding: 12px 0 0 0; color: #64748b; font-weight: 500;\">Total Amount</td>\n                    <td style=\"padding: 12px 0 0 0; color: #4f46e5; text-align: right; font-weight: 700; font-size: 16px;\">{{ $json['Total Amount'] }}</td>\n                  </tr>\n                </table>\n              </div>\n\n              <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin-bottom: 28px;\">\n                <tr>\n                  <td align=\"center\">\n                    <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n                      <tr>\n                        <td align=\"center\" style=\"border-radius: 6px; background-color: #10b981;\">\n                          <a href=\"{{ $json['webViewLink'] || $('Combine OCR & Metadata').item.json.webViewLink }}\" target=\"_blank\" style=\"display: inline-block; padding: 12px 28px; font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 6px; letter-spacing: 0.2px;\">\n                            Open Processed Document\n                          </a>\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n              </table>\n\n              <p style=\"margin: 0; font-size: 14px; color: #64748b; font-style: italic;\">\n                No manual action is required at this time. Payment processing will clear based on the standard Net terms window.\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"background-color: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0;\">\n              <p style=\"margin: 0; font-size: 12px; color: #94a3b8; line-height: 18px;\">\n                This is an automated operational notification generated by your <strong>n8n Document Pipeline Node Engine</strong><br>\n                Secured Audit-Trail Logging Engine.\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "164549fd-5431-402f-bdfe-ef29fe971c26",
+      "name": "Notify Processing Success",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1680,
+        16
+      ],
+      "webhookId": "your-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-oauth2-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=⚠️ Action Required: Invoice Processing Failure ({{ $json[\"File Name\"] }})",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Invoice Processing Exception Alert</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\">\n  <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"background-color: #f4f6f8; padding: 30px 0;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-top: 4px solid #e74c3c;\">\n          \n          <tr>\n            <td style=\"padding: 35px 40px 20px 40px;\">\n              <span style=\"display: inline-block; background-color: #fce8e6; color: #c53929; padding: 6px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; border-radius: 4px; letter-spacing: 0.5px; margin-bottom: 15px;\">\n                ⚠️ Attention Required\n              </span>\n              <h2 style=\"margin: 0 0 10px 0; color: #1a202c; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;\">\n                Invoice Processing Exception\n              </h2>\n              <p style=\"margin: 0; color: #718096; font-size: 15px; line-height: 1.6;\">\n                An inbound document failed automatic verification constraints during parsing and has been successfully logged to the compliance review queue.\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 10px 40px 25px 40px;\">\n              <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"12\" style=\"background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; color: #2d3748;\">\n                <tr>\n                  <td width=\"35%\" style=\"font-weight: 600; color: #718096; border-bottom: 1px solid #edf2f7;\">Document Name:</td>\n                  <td style=\"font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px; border-bottom: 1px solid #edf2f7; color: #1a202c;\">\n                    {{ $json['File Name'] }}\n                  </td>\n                </tr>\n                <tr>\n                  <td style=\"font-weight: 600; color: #718096; border-bottom: 1px solid #edf2f7;\">Identified Vendor:</td>\n                  <td style=\"border-bottom: 1px solid #edf2f7; font-weight: 500;\">\n                    {{ $json['Extracted Vendor'] || 'Parsing Failed' }}\n                  </td>\n                </tr>\n                <tr>\n                  <td style=\"font-weight: 600; color: #718096; border-bottom: 1px solid #edf2f7;\">Extracted Amount:</td>\n                  <td style=\"border-bottom: 1px solid #edf2f7; font-weight: 700; color: #1a202c;\">\n                    {{ $json['Extracted Amount'] || 'N/A' }}\n                  </td>\n                </tr>\n                <tr>\n                  <td style=\"font-weight: 600; color: #718096;\">Workflow Status:</td>\n                  <td>\n                    <span style=\"color: #dd6b20; font-weight: 600;\">\n                      ● {{ $json['Review Status'] || 'Pending Review' }}\n                    </span>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <tr>\n            <td align=\"center\" style=\"padding: 10px 40px 40px 40px;\">\n              <table border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n                <tr>\n                  <td align=\"center\" style=\"border-radius: 5px; background-color: #e74c3c;\">\n                    <a href=\"{{ $json['File Link'] }}\" target=\"_blank\" style=\"display: inline-block; padding: 14px 28px; font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none; border-radius: 5px; letter-spacing: 0.2px;\">\n                      Open Original Document Securely\n                    </a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 20px 40px; background-color: #edf2f7; font-size: 12px; color: #a0aec0; text-align: center; line-height: 1.5;\">\n              This is a system-generated operational notification managed by your corporate <strong>n8n Document Pipeline Node Engine</strong>.\n            </td>\n          </tr>\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        208
+      ],
+      "id": "819cc387-d30c-40c2-b6cf-0b42366be099",
+      "name": "Alert Manual Review Required",
+      "webhookId": "your-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-oauth2-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "17c9ca9d-cc4c-44da-81d6-539839bf166a",
+              "leftValue": "={{ $json.output['Invoice Number'] }}",
+              "rightValue": "Not Found",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "cb1641d0-9237-4c5e-b08c-7e3747be2fcb",
+              "leftValue": "={{ Number($json.output['Total Amount'].replace(/[$,]/g, '')) }}",
+              "rightValue": "={{ 0 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "5feffe2d-844b-4463-8076-e573c886bc50",
+              "leftValue": "={{ DateTime.fromISO($json.output['Due Date']).isValid }}",
+              "rightValue": "Not Found",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f8cf6a78-75bd-4202-85aa-ed15feb1388d",
+              "leftValue": "={{ $('OCR Invoice PDF').item.json.results[0].entities[0].objects[0].entities[0].text.length }}",
+              "rightValue": "={{ 100 }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        112
+      ],
+      "id": "03eb4d66-0651-4451-9440-a612ec54b4ac",
+      "name": "Validate Invoice"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "169dCEyhdJQUxPvUZwEpBrbK0jikQSQZ-gPvBYzwbeaM",
+          "mode": "list",
+          "cachedResultName": "Invoice Processing Dashboard",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "✅ Processed Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Invoice Number ": "={{ $json.output['Invoice Number'] }}",
+            "Client Name": "={{ $json.output['Client Name'] }}",
+            "Client Email": "={{ $json.output['Client Email'] }}",
+            "Client Address": "={{ $json.output['Client Address'] }}",
+            "Client phone": "={{ $json.output['Client Phone'] }}",
+            "Total Amount": "={{ $json.output['Total Amount'] }}",
+            "Invoice Date": "={{ $json.output['Invoice Date'] }}",
+            "Due Date": "={{ $json.output['Due Date'] }}",
+            "File Link": "={{ $json.webViewLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Number ",
+              "displayName": "Invoice Number ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Address",
+              "displayName": "Client Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client phone",
+              "displayName": "Client phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Amount",
+              "displayName": "Total Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File Link",
+              "displayName": "File Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cdb80270-2a52-4c91-abb1-603f90e9f61e",
+      "name": "Append Invoice Record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1456,
+        16
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-oauth2-credentials-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 2000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        736,
+        496
+      ],
+      "id": "3b624356-00ad-48e6-a04c-9b9961ea0335",
+      "name": "AI Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "your-openrouter-api-credentials-id",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -16,
+        112
+      ],
+      "id": "00f6a138-c5f7-417e-940c-ff3bb28c6c24",
+      "name": "Monitor Invoice Emails",
+      "alwaysOutputData": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-oauth2-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "attachment_0",
+        "name": "={{ $binary.attachment_0.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "118oh_Ur4XRDxVVbtunhJ0AkAX16kR7oU",
+          "mode": "list",
+          "cachedResultName": "Invoices_To_Process",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-folder-id"
+        },
+        "options": {}
+      },
+      "id": "13e6f439-d388-482b-9c32-b6e3ed345b48",
+      "name": "Archive Original Invoice",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        720,
+        -32
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "your-google-drive-oauth2-credentials-id",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1008,
+        112
+      ],
+      "id": "6e73d566-8610-4dfa-82e8-3bb978afd574",
+      "name": "Combine OCR & Metadata",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://demo.api4ai.cloud/ocr/v1/results",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "A4A-API-KEY",
+              "value": "your-api4ai-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "attachment_0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "631c7db9-cf84-4421-bfa3-34186411b7e6",
+      "name": "OCR Invoice PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.results[0].entities[0].objects[0].entities[0].text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Invoice Number",
+              "description": "the number of the invoice",
+              "required": true
+            },
+            {
+              "name": "Client Name",
+              "description": "the name of the client",
+              "required": true
+            },
+            {
+              "name": "Client Email",
+              "description": "the email of the client",
+              "required": true
+            },
+            {
+              "name": "Client Address",
+              "description": "the address of the client",
+              "required": true
+            },
+            {
+              "name": "Client Phone",
+              "description": "the phone number of the client",
+              "required": true
+            },
+            {
+              "name": "Total Amount",
+              "description": "the total amount of the invoice",
+              "required": true
+            },
+            {
+              "name": "Invoice Date",
+              "type": "date",
+              "description": "the date of the invoice was sent"
+            },
+            {
+              "name": "Due Date",
+              "type": "date",
+              "description": "the date of the invoice is due",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text based on the provided attributes.\n\nCRITICAL RULE: If a requested attribute is missing, unknown, or cannot be found in the text, do not omit it and do not leave it blank. You must strictly set its value to \"Not Found\"."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        272
+      ],
+      "id": "618693d1-ca73-4b78-8bc4-95f8e91735d7",
+      "name": "AI Invoice Extractor",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "169dCEyhdJQUxPvUZwEpBrbK0jikQSQZ-gPvBYzwbeaM",
+          "mode": "list",
+          "cachedResultName": "Invoice Processing Dashboard",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1196335297,
+          "mode": "list",
+          "cachedResultName": "⚠ Invoice Audit Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=1196335297"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "File Name": "={{ $json.name }}",
+            "Raw OCR Text": "={{ $('OCR Invoice PDF').item.json.results[0].entities[0].objects[0].entities[0].text }}",
+            "Failure Reason": "Explicit error categorization string",
+            "Review Status": "Pending Review",
+            "Extracted Vendor": "={{ $json.output['Client Name'] }}",
+            "Extracted Amount": "={{ $json.output['Total Amount'] }}",
+            "File Link": "={{ $json.webViewLink }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File Link",
+              "displayName": "File Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Failure Reason",
+              "displayName": "Failure Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Extracted Vendor",
+              "displayName": "Extracted Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Extracted Amount",
+              "displayName": "Extracted Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Review Status",
+              "displayName": "Review Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes / Actions",
+              "displayName": "Notes / Actions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Raw OCR Text",
+              "displayName": "Raw OCR Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1456,
+        208
+      ],
+      "id": "c74eaeed-ba9e-4f79-a3b5-8060897bf4a2",
+      "name": "Log Failed Invoice",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-oauth2-credentials-id",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download Email Attachments": {
+      "main": [
+        [
+          {
+            "node": "OCR Invoice PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Archive Original Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Processing Success": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert Manual Review Required": {
+      "main": [
+        [
+          {
+            "node": "END",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Invoice": {
+      "main": [
+        [
+          {
+            "node": "Append Invoice Record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Failed Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Invoice Record": {
+      "main": [
+        [
+          {
+            "node": "Notify Processing Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Invoice Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitor Invoice Emails": {
+      "main": [
+        [
+          {
+            "node": "Download Email Attachments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archive Original Invoice": {
+      "main": [
+        [
+          {
+            "node": "Combine OCR & Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine OCR & Metadata": {
+      "main": [
+        [
+          {
+            "node": "Validate Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR Invoice PDF": {
+      "main": [
+        [
+          {
+            "node": "AI Invoice Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Invoice Extractor": {
+      "main": [
+        [
+          {
+            "node": "Combine OCR & Metadata",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Log Failed Invoice": {
+      "main": [
+        [
+          {
+            "node": "Alert Manual Review Required",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cdcccec9-8740-49d0-9d00-b6f83e3e8f5d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
+  },
+  "nodeGroups": [],
+  "id": "KYKmWIXUIAA3s4Jh",
+  "tags": []
+}
