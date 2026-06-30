@@ -1,0 +1,974 @@
+{
+  "name": "AI Lead Enrichment & Qualification Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8df382e5-ca29-442a-98af-0aa9d8ffe1ae",
+              "name": "Name",
+              "value": "={{ $json['What is your full name?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "bc2de95d-ca24-470c-93e7-c16b0478b886",
+              "name": "Email",
+              "value": "={{ $json['What is your business or primary email address?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "bf410fe0-10bc-4505-990f-824ac8ccff54",
+              "name": "company",
+              "value": "={{ $json['What is your company name?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "7be7a3bf-9ee7-4ada-aa0c-7543becf1cbe",
+              "name": "company website / domain",
+              "value": "={{ $json['What is your company website / domain?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "8c597482-0968-48be-9216-0137cd1b0918",
+              "name": "Project Description",
+              "value": "={{ $json['Please describe your project or operational bottleneck.'] }}",
+              "type": "string"
+            },
+            {
+              "id": "bc59ab2f-532c-4648-8804-c5594d1d6416",
+              "name": "Budget",
+              "value": "={{ $json['What is your estimated development budget range?'] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "0f159fb3-0706-4052-a72d-19ed3ea70be4",
+      "name": "Normalize Lead Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/v1/organizations/enrich",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Api-Key",
+              "value": "your-apollo-api-key"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"domain\": \"{{ $json['company website / domain'] }}\"\n}",
+        "options": {}
+      },
+      "id": "64dd4be2-9442-4773-8fc6-6043d5d26859",
+      "name": "Enrich Lead Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        976
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f6d86dd6-4bc7-47b7-9d23-51355567af41",
+              "name": "Name",
+              "value": "={{ $('Normalize Lead Data').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "2ae47b68-b184-4bcd-80d9-29790b4c3d17",
+              "name": "Email",
+              "value": "={{ $('Normalize Lead Data').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "3e8d3ed5-9d36-4efc-844f-ab586df2bcc0",
+              "name": "Company",
+              "value": "={{ $('Calculate Lead Score').item.json.company }}",
+              "type": "string"
+            },
+            {
+              "id": "028d29da-8331-4d14-9b81-ee204317df7a",
+              "name": "Lead Score",
+              "value": "={{ $('Calculate Lead Score').item.json.lead_score }}",
+              "type": "number"
+            },
+            {
+              "id": "cb0ed53c-e965-4b7b-ae27-42d197e9a85b",
+              "name": "Budget",
+              "value": "={{ $('Normalize Lead Data').item.json.Budget }}",
+              "type": "number"
+            },
+            {
+              "id": "0c2ddf58-7439-42a3-b48a-e415476a77df",
+              "name": "Priority",
+              "value": "={{ $json.output.priority }}",
+              "type": "string"
+            },
+            {
+              "id": "6ad938df-072b-4067-8d72-6cabda37f133",
+              "name": "Lead Summary",
+              "value": "={{ $json.output.lead_summary }}",
+              "type": "string"
+            },
+            {
+              "id": "9203869d-2132-4456-8354-28d76774579b",
+              "name": "Pain Points",
+              "value": "={{ $json.output.pain_points }}",
+              "type": "array"
+            },
+            {
+              "id": "fd882724-d306-4a15-9715-23ac62ef46ae",
+              "name": "Recommended Solution",
+              "value": "={{ $json.output.recommended_solution }}",
+              "type": "string"
+            },
+            {
+              "id": "66facb9d-0dc2-40ce-a2fe-554069b4a897",
+              "name": "Value Proposition",
+              "value": "={{ $json.output.value_proposition }}",
+              "type": "string"
+            },
+            {
+              "id": "9a760a87-63f6-42f7-b2b1-66a56031c54b",
+              "name": "Outreach Strategy",
+              "value": "={{ $json.output.outreach_strategy }}",
+              "type": "string"
+            },
+            {
+              "id": "9eea880e-746d-4dcc-b57d-cd269a7001b1",
+              "name": "Personalized Opening",
+              "value": "={{ $json.output.personalized_opening }}",
+              "type": "string"
+            },
+            {
+              "id": "305b2245-1bcf-4bcc-abd8-6bb9c402cd05",
+              "name": "Email Subject",
+              "value": "={{ $json.output.email_subject }}",
+              "type": "string"
+            },
+            {
+              "id": "1255e91d-5be8-422d-bae8-481bdc66962c",
+              "name": "Call to Action",
+              "value": "={{ $json.output.call_to_action }}",
+              "type": "string"
+            },
+            {
+              "id": "f36139a1-6896-4960-b975-f715e0c24a8c",
+              "name": "Next Follow-up",
+              "value": "={{ $json.output.next_follow_up }}",
+              "type": "string"
+            },
+            {
+              "id": "141c0e8e-43ae-4871-8b9a-63b3d7e18d07",
+              "name": "Estimated Deal Size",
+              "value": "={{ $json.output.estimated_deal_size }}",
+              "type": "string"
+            },
+            {
+              "id": "756750d5-15bb-4f09-a424-1a9e68a32d02",
+              "name": "Confidence Score",
+              "value": "={{ $json.output.confidence_score }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "be76e156-5876-4492-97f8-b12b020c1df3",
+      "name": "Combine Lead & AI Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "formId": "your-typeform-form-id"
+      },
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        976
+      ],
+      "id": "d343c270-5531-48b3-ad10-2819d6f8eac0",
+      "name": "Typeform Trigger",
+      "webhookId": "your-typeform-webhook-id",
+      "credentials": {
+        "typeformApi": {
+          "id": "your-typeform-api-credential-id",
+          "name": "Typeform account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.lead_score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "ca620169-eaf3-425a-b8aa-de9c29bfd0c4"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c1886d36-1d24-4208-a650-1b2c08b5c35e",
+                    "leftValue": "={{ $json.lead_score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        976
+      ],
+      "id": "478a525b-946a-4590-99a6-73256bd25556",
+      "name": "Route by Lead Quality"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "options": {
+          "maxTokens": 5000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        976,
+        944
+      ],
+      "id": "e118aa50-7d3a-41fa-9793-9d5239b0e1fa",
+      "name": "AI Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "your-openrouter-api-key",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"priority\": \"High\",\n  \"lead_summary\": \"Short summary\",\n  \"pain_points\": [\n    \"Pain point 1\",\n    \"Pain point 2\",\n    \"Pain point 3\"\n  ],\n  \"recommended_solution\": \"Recommended automation solution\",\n  \"value_proposition\": \"Business value\",\n  \"best_outreach_channel\": \"Email\",\n  \"outreach_strategy\": \"Recommended outreach approach\",\n  \"personalized_opening\": \"Opening sentence\",\n  \"email_subject\": \"Subject line\",\n  \"call_to_action\": \"CTA\",\n  \"next_follow_up\": \"Follow-up recommendation\",\n  \"estimated_deal_size\": \"$5,000-$10,000\",\n  \"confidence_score\": 90\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        944
+      ],
+      "id": "a18bd829-08a6-41c9-a831-c76fb9fc938f",
+      "name": "Outreach Strategy Parser"
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=📋 Low-Priority Lead Logged: {{ $json[\"Company\"] }} (Score: {{ $json[\"Lead Score\"] }})",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Low-Priority Lead Logged</title>\n</head>\n\n<body style=\"margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;\">\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f7fb;padding:40px 0;\">\n<tr>\n<td align=\"center\">\n\n<table width=\"700\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">\n\n<!-- Header -->\n\n<tr>\n<td style=\"background:#334155;padding:30px;text-align:center;\">\n\n<div style=\"font-size:34px;\">📋</div>\n\n<h1 style=\"margin:10px 0 5px;color:#ffffff;font-size:28px;\">\nLow-Priority Lead Logged\n</h1>\n\n<p style=\"margin:0;color:#cbd5e1;font-size:16px;\">\nAI Lead Enrichment & Qualification Pipeline\n</p>\n\n</td>\n</tr>\n\n<!-- Score -->\n\n<tr>\n<td style=\"padding:30px;\">\n\n<table width=\"100%\">\n\n<tr>\n\n<td>\n<h2 style=\"margin:0;color:#111827;\">\nLead Score\n</h2>\n</td>\n\n<td align=\"right\">\n\n<span style=\"\nbackground:#64748b;\ncolor:white;\npadding:10px 18px;\nborder-radius:20px;\nfont-weight:bold;\nfont-size:18px;\n\">\n\n{{ $json[\"Lead Score\"] }}/100\n\n</span>\n\n</td>\n\n</tr>\n\n</table>\n\n<p style=\"margin-top:20px;color:#4b5563;font-size:16px;line-height:1.7;\">\n\nThis lead has been automatically evaluated by the AI Lead Enrichment & Qualification Pipeline and classified as <strong>Low Priority</strong>. No outreach has been initiated.\n\n</p>\n\n</td>\n</tr>\n\n<!-- Lead Details -->\n\n<tr>\n\n<td style=\"padding:0 30px 30px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n👤 Lead Details\n</h2>\n\n<table width=\"100%\" cellpadding=\"10\" cellspacing=\"0\" style=\"border-collapse:collapse;\">\n\n<tr>\n<td width=\"35%\" style=\"background:#f8fafc;font-weight:bold;\">Name</td>\n<td>{{ $json.Name }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Company</td>\n<td>{{ $json.Company }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Email</td>\n<td>{{ $json['Email '] }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Domain</td>\n<td>{{ $json.Domain }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Budget</td>\n<td>${{ $json.Budget }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Lead Score</td>\n<td>{{ $json[\"Lead Score\"] }}/100</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Confidence Score</td>\n<td>{{ $json[\"Confidence Score\"] ? $json[\"Confidence Score\"] + '%' : 'N/A (Low Priority)' }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Company Size</td>\n<td>{{ $json[\"Company Size\"] }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Corporate Email</td>\n<td>{{ $json[\"Corporate Email\"] }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Status</td>\n<td>{{ $json.Status }}</td>\n</tr>\n\n</table>\n\n</td>\n\n</tr>\n\n<!-- Qualification -->\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n📉 Qualification Result\n</h2>\n\n<div style=\"\nbackground:#eff6ff;\npadding:18px;\nborder-left:5px solid #3b82f6;\nborder-radius:8px;\nline-height:1.7;\ncolor:#374151;\n\">\n\n<strong>Reason:</strong><br><br>\n\n{{ $json.Reason }}\n\n</div>\n\n</td>\n\n</tr>\n\n<!-- Recommendation -->\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n💡 Recommendation\n</h2>\n\n<div style=\"\nbackground:#f8fafc;\npadding:18px;\nborder-left:5px solid #94a3b8;\nborder-radius:8px;\nline-height:1.8;\ncolor:#374151;\n\">\n\nStore this lead in the <strong>Low-Quality Leads</strong> database for future nurturing campaigns. If additional information becomes available or the lead profile changes, the lead can be reprocessed through the enrichment pipeline.\n\n</div>\n\n</td>\n\n</tr>\n\n<!-- Footer -->\n\n<tr>\n\n<td style=\"\nbackground:#f8fafc;\npadding:25px;\ntext-align:center;\nfont-size:13px;\ncolor:#6b7280;\n\">\n\nGenerated automatically by the\n<strong>AI Lead Enrichment & Qualification Pipeline</strong>\n\n<br><br>\n\nThis notification is for internal tracking purposes only.\n\n</td>\n\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        1120
+      ],
+      "id": "9d84fe0c-83ae-4650-a531-b15d0e696e6a",
+      "name": "Notify Low-Priority Lead",
+      "webhookId": "your-gmail-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-oauth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 📊 Lead Qualification Rules\n\n**Scoring Breakdown (Max 100 points):**\n* **Domain Quality (30 pts):** Corporate Email = 30 pts | Consumer Email (Gmail/Yahoo) = 5 pts\n* **Project Budget (40 pts):** ≥ $5k = 40 pts | ≥ $2k = 25 pts | > $0 = 10 pts\n* **Company Scale (20 pts):** ≥ 100 emp = 20 pts | ≥ 10 emp = 10 pts | > 0 emp = 5 pts\n* **Description Richness (10 pts):** > 150 chars = 10 pts | > 50 chars = 5 pts\n\n**🔀 Routing Threshold:**\n* **Branch 0 (High Value):** Score ≥ 50 ➔ Triggers AI personalization & instant alert.\n* **Branch 1 (Low Priority):** Score < 50 ➔ Logs to spreadsheet quietly.",
+        "height": 384,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        496
+      ],
+      "typeVersion": 1,
+      "id": "ff1b9785-21a6-4631-b6ce-e3a0610db961",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop through all incoming items from Enrich Lead Data\nfor (const item of $input.all()) {\n  \n  // 1. Safely access the organization data object\n  const organization = item.json.organization || {};\n  \n  // 2. Extract the domain directly from Apollo's payload\n  const domain = organization.primary_domain || \"\";\n  \n  // 3. List of common public consumer email domains to filter out\n  const consumerDomains = [\n    'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', \n    'icloud.com', 'protonmail.com', 'aol.com', 'zoho.com'\n  ];\n\n  // 4. Evaluate if it's a corporate domain\n  let isCorporate = false;\n  if (domain && !consumerDomains.includes(domain.toLowerCase())) {\n    isCorporate = true;\n  }\n\n  // 5. Calculate the headcount by summing the departments (equals 163)\n  const departments = organization.departmental_head_count || {};\n  let totalCompanySize = Object.values(departments).reduce((sum, count) => sum + count, 0);\n  \n  // Fallback: If departmental breakdown is missing, use Apollo's high-level estimate (180)\n  if (totalCompanySize === 0) {\n    totalCompanySize = organization.estimated_num_employees || 0;\n  }\n\n  // 6. Append the new values directly into the existing item payload\n  // This ensures you don't lose name, budget, or project descriptions!\n  item.json.is_corporate_domain = isCorporate;\n  item.json.company_size = totalCompanySize;\n  \n  // Backfill the domain root field if it isn't there already\n  if (!item.json.domain && domain) {\n    item.json.domain = domain;\n  }\n}\n\n// Pass the enriched items down the pipeline\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        976
+      ],
+      "id": "d6ff706f-afdb-4fd1-a4ec-477abf836a5f",
+      "name": "Evaluate Domain Quality"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop through all incoming items from Assess Domain Quality\nfor (const item of $input.all()) {\n  \n  // 1. Use .first().json to bypass n8n's item-pairing tracking bug\n  let leadData = {};\n  try {\n    leadData = $('Normalize Lead Data').first().json;\n  } catch (e) {\n    leadData = item.json; // Backup fallback\n  }\n  \n  // 2. FIXED: Pull company name directly from the Typeform Trigger node\n  let companyName = \"\";\n  try {\n    const typeformData = $('Typeform Trigger').first().json;\n    // Checks multiple common casing styles depending on how you typed it in Typeform\n    companyName = typeformData[\"Company Name\"] || \n                  typeformData[\"Company name\"] || \n                  typeformData[\"company\"] || \n                  typeformData[\"company_name\"] || \n                  leadData.company || \"\"; \n  } catch (e) {\n    companyName = leadData.company || \"\"; // Ultimate backup fallback\n  }\n\n  // 3. Map core identity fields using your exact updated casing properties\n  const name = leadData.Name || leadData.name || leadData[\"What is your full name?\"] || \"\";\n  const email = leadData.Email || leadData.email || leadData[\"What is your business or primary email address?\"] || \"\";\n  const domain = item.json.domain || leadData.domain || leadData[\"What is your company's website or domain?\"] || \"\";\n  \n  // 4. Extract budget and description details\n  const budget = Number(leadData.Budget || leadData.budget || leadData[\"What is your estimated development budget range?\"]) || 0;\n  const projectDesc = leadData[\"Project Description\"] || leadData.project_description || leadData[\"Please describe your project or operational bottleneck.\"] || \"\";\n  \n  // 5. Pull quality metrics calculated in the previous node step\n  const isCorporate = item.json.is_corporate_domain === true;\n  const totalCompanySize = Number(item.json.company_size) || 0;\n\n  // 6. Calculate Lead Score\n  let score = 0;\n\n  // Rule A: Email Domain Quality (Max 30 pts)\n  if (isCorporate) {\n    score += 30;\n  } else {\n    score += 5; \n  }\n\n  // Rule B: Estimated Project Budget (Max 40 pts)\n  if (budget >= 5000) {\n    score += 40;\n  } else if (budget >= 2000) {\n    score += 25;\n  } else if (budget > 0) {\n    score += 10;\n  }\n\n  // Rule C: Company Scale / Employee Headcount (Max 20 pts)\n  if (totalCompanySize >= 100) {\n    score += 20; \n  } else if (totalCompanySize >= 10) {\n    score += 10; \n  } else if (totalCompanySize > 0) {\n    score += 5;   \n  }\n\n  // Rule D: Request Richness / Description Length (Max 10 pts)\n  if (projectDesc.trim().length > 150) {\n    score += 10; \n  } else if (projectDesc.trim().length > 50) {\n    score += 5;\n  }\n\n  // Restrict score boundaries between 0 and 100\n  score = Math.max(0, Math.min(score, 100));\n\n  // 7. Reconstruct the object with 100% of the required data fields populated\n  item.json = {\n    name: name,\n    email: email,\n    company: companyName,\n    domain: isCorporate && domain ? domain : \"NA\", // <-- FIXED: Outputs \"NA\" if is_corporate_domain is false or empty\n    project_description: projectDesc,\n    budget: budget,\n    is_corporate_domain: isCorporate,\n    company_size: totalCompanySize,\n    lead_score: score\n  };\n}\n\n// Return the completely unified data object down the pipeline\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        976
+      ],
+      "id": "61670bef-989a-420d-b742-b542033fbf9f",
+      "name": "Calculate Lead Score"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior B2B Sales Consultant and AI Automation Strategist.\n\nYour objective is to help a salesperson quickly understand a qualified lead and create a personalized outreach strategy that maximizes the chances of booking a discovery call.\n\n## Lead Information\n\nName: {{ $json.name }}\n\nEmail: {{ $json.email }}\n\nCompany: {{ $json.company }}\n\nEmail Domain: {{ $json.domain }}\n\nCompany Size: {{ $json.company_size }}\n\nLead Score: {{ $json.lead_score }}\n\nBudget: ${{ $json.budget }}\n\nProject Description:\n{{ $json.project_description }}\n\n---\n\nAnalyze the lead using only the information provided.\n\nGenerate a practical outreach strategy that a salesperson can use immediately.\n\nGuidelines:\n\n* Determine whether the lead priority is High, Medium, or Low.\n* Summarize the lead in one concise sentence.\n* Identify up to three likely business pain points.\n* Recommend an automation or AI solution that directly addresses those pain points.\n* Explain the business value of the proposed solution.\n* Choose the best outreach channel (Email, LinkedIn, Phone, or Email then LinkedIn).\n* Write a concise outreach strategy focused on solving the lead's business problem.\n* Create a personalized opening sentence for the first outreach email.\n* Generate a short and compelling email subject line.\n* Suggest a clear call to action that encourages a discovery call.\n* Recommend the best follow-up action if there is no reply within a few business days.\n* Estimate an appropriate project value based on the lead's budget, company size, and project complexity.\n* Assign a confidence score between 1 and 100.\n\nDo not invent facts about the company. Base all recommendations on reasonable inferences from the supplied information.\n\nFollow the output schema provided by the Structured Output Parser.\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "71eed74f-e63e-42d6-8943-2f63b2b3188e",
+      "name": "Generate AI Sales Intelligence",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "Inbound Lead Triage Hub",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "🔥 High-Value Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Company": "={{ $('Normalize Lead Data').item.json.company }}",
+            "Lead Score": "={{ $json['Lead Score'] }}",
+            "Budget": "={{ $json.Budget }}",
+            "Priority": "={{ $json.Priority }}",
+            "Lead Summary": "={{ $json['Lead Summary'] }}",
+            "Pain Points": "={{ $json['Pain Points'] }}",
+            "Recommended Solution": "={{ $json['Recommended Solution'] }}",
+            "Value Proposition": "={{ $json['Value Proposition'] }}",
+            "Outreach Strategy": "={{ $json['Outreach Strategy'] }}",
+            "Personalized Opening": "={{ $json['Personalized Opening'] }}",
+            "Email Subject": "={{ $json['Email Subject'] }}",
+            "Call to Action": "={{ $json['Call to Action'] }}",
+            "Next Follow-up": "={{ $json['Next Follow-up'] }}",
+            "Estimated Deal Size": "={{ $json['Estimated Deal Size'] }}",
+            "Confidence Score": "={{ $json['Confidence Score'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Score",
+              "displayName": "Lead Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Summary",
+              "displayName": "Lead Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pain Points",
+              "displayName": "Pain Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recommended Solution",
+              "displayName": "Recommended Solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Value Proposition",
+              "displayName": "Value Proposition",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Outreach Strategy",
+              "displayName": "Outreach Strategy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Personalized Opening",
+              "displayName": "Personalized Opening",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Subject",
+              "displayName": "Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Call to Action",
+              "displayName": "Call to Action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Follow-up",
+              "displayName": "Next Follow-up",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estimated Deal Size",
+              "displayName": "Estimated Deal Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Confidence Score",
+              "displayName": "Confidence Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "61799b25-4ff8-48e8-a7cb-b97b8a95a416",
+      "name": "Log High-Value Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1536,
+        832
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-oauth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@gmail.com",
+        "subject": "=🚀 High-Value Lead: {{ $json[\"Company\"] }} (Score: {{ $json[\"Lead Score\"] }})",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>High-Value Lead Alert</title>\n</head>\n\n<body style=\"margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;\">\n\n<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f7fb;padding:40px 0;\">\n<tr>\n<td align=\"center\">\n\n<table width=\"700\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">\n\n<tr>\n<td style=\"background:#0f172a;padding:30px;text-align:center;\">\n\n<div style=\"font-size:34px;\">🚀</div>\n\n<h1 style=\"margin:10px 0 5px;color:white;font-size:28px;\">\nHigh-Value Lead Identified\n</h1>\n\n<p style=\"margin:0;color:#cbd5e1;font-size:16px;\">\nAI Lead Enrichment & Qualification Pipeline\n</p>\n\n</td>\n</tr>\n\n<tr>\n<td style=\"padding:30px;\">\n\n<table width=\"100%\" cellpadding=\"0\">\n\n<tr>\n\n<td>\n\n<h2 style=\"margin:0;color:#111827;\">\nLead Score\n</h2>\n\n</td>\n\n<td align=\"right\">\n\n<span style=\"\nbackground:#16a34a;\ncolor:white;\npadding:10px 18px;\nborder-radius:20px;\nfont-weight:bold;\nfont-size:18px;\n\">\n{{ $json[\"Lead Score\"] }}/100\n</span>\n\n</td>\n\n</tr>\n\n</table>\n\n<p style=\"margin-top:20px;color:#4b5563;font-size:16px;line-height:1.6;\">\nA new lead has been automatically enriched, analyzed by AI, and classified as\n<strong>High Priority</strong>.\n</p>\n\n</td>\n</tr>\n\n<tr>\n\n<td style=\"padding:0 30px 30px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n📋 Lead Details\n</h2>\n\n<table width=\"100%\" cellpadding=\"10\" cellspacing=\"0\" style=\"border-collapse:collapse;\">\n\n<tr>\n<td width=\"35%\" style=\"background:#f8fafc;font-weight:bold;\">Name</td>\n<td>{{ $json.Name }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Company</td>\n<td>{{ $json.Company }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Email</td>\n<td>{{ $json.Email }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Priority</td>\n<td>\n<span style=\"background:#dc2626;color:white;padding:5px 12px;border-radius:15px;\">\n{{ $json.Priority }}\n</span>\n</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Budget</td>\n<td>${{ $json.Budget }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Estimated Deal Size</td>\n<td>{{ $json[\"Estimated Deal Size\"] }}</td>\n</tr>\n\n<tr>\n<td style=\"background:#f8fafc;font-weight:bold;\">Confidence</td>\n<td>{{ $json[\"Confidence Score\"] }}%</td>\n</tr>\n\n</table>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n📝 Lead Summary\n</h2>\n\n<div style=\"\nbackground:#f8fafc;\npadding:18px;\nborder-left:5px solid #2563eb;\nborder-radius:8px;\nline-height:1.7;\ncolor:#374151;\n\">\n\n{{ $json[\"Lead Summary\"] }}\n\n</div>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n⚠ Key Pain Points\n</h2>\n\n<div style=\"\nbackground:#fff7ed;\nborder-left:5px solid #f59e0b;\npadding:18px;\nborder-radius:8px;\ncolor:#374151;\nline-height:1.7;\n\">\n\n{{ $json[\"Pain Points\"] }}\n\n</div>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n💡 Recommended Solution\n</h2>\n\n<div style=\"\nbackground:#ecfdf5;\npadding:18px;\nborder-left:5px solid #10b981;\nborder-radius:8px;\nline-height:1.7;\n\">\n\n{{ $json[\"Recommended Solution\"] }}\n\n</div>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n🎯 Value Proposition\n</h2>\n\n<p style=\"line-height:1.8;color:#374151;\">\n\n{{ $json[\"Value Proposition\"] }}\n\n</p>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td style=\"padding:0 30px 25px;\">\n\n<h2 style=\"color:#1f2937;border-bottom:2px solid #eef2f7;padding-bottom:10px;\">\n📬 Outreach Strategy\n</h2>\n\n<p style=\"line-height:1.8;color:#374151;\">\n\n{{ $json[\"Outreach Strategy\"] }}\n\n</p>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td align=\"center\" style=\"padding:10px 30px 35px;\">\n\n<a href=\"mailto:{{ $json.Email }}\"\nstyle=\"\nbackground:#2563eb;\ncolor:white;\npadding:15px 34px;\ntext-decoration:none;\nborder-radius:8px;\nfont-size:17px;\nfont-weight:bold;\ndisplay:inline-block;\n\">\n\nContact Lead\n\n</a>\n\n</td>\n\n</tr>\n\n<tr>\n\n<td style=\"\nbackground:#f8fafc;\npadding:25px;\ntext-align:center;\nfont-size:13px;\ncolor:#6b7280;\n\">\n\nGenerated automatically by the\n<strong>AI Lead Enrichment & Qualification Pipeline</strong>\n\n<br><br>\n\nReview this opportunity promptly to maximize conversion potential.\n\n</td>\n\n</tr>\n\n</table>\n\n</td>\n</tr>\n</table>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        832
+      ],
+      "id": "20ffeb99-3a6b-49dd-ac03-6adab605df9a",
+      "name": "Notify High-Value Lead",
+      "webhookId": "your-gmail-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-oauth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "Inbound Lead Triage Hub",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 282927032,
+          "mode": "list",
+          "cachedResultName": "❄️ Low-Priority Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=282927032"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Name": "={{ $json.name }}",
+            "Email ": "={{ $json.email }}",
+            "Company": "={{ $('Normalize Lead Data').item.json.company }}",
+            "Domain": "={{ $json.domain }}",
+            "Budget": "={{ $json.budget }}",
+            "Lead Score": "={{ $json.lead_score }}",
+            "Company Size": "={{ $json.company_size }}",
+            "Corporate Email": "={{ $json.is_corporate_domain }}",
+            "Reason": "Lead Score below qualification threshold",
+            "Status": "New"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Score",
+              "displayName": "Lead Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Size",
+              "displayName": "Company Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Corporate Email",
+              "displayName": "Corporate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        1120
+      ],
+      "id": "a3fd00ae-54a8-4d8d-9d10-81b7fb49ef0e",
+      "name": "Log Low-Priority Lead",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-oauth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Enrich Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Domain Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Lead & AI Data": {
+      "main": [
+        [
+          {
+            "node": "Log High-Value Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Typeform Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Lead Quality": {
+      "main": [
+        [
+          {
+            "node": "Generate AI Sales Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Low-Priority Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate AI Sales Intelligence",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outreach Strategy Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate AI Sales Intelligence",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Domain Quality": {
+      "main": [
+        [
+          {
+            "node": "Calculate Lead Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Lead Score": {
+      "main": [
+        [
+          {
+            "node": "Route by Lead Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate AI Sales Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Combine Lead & AI Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log High-Value Lead": {
+      "main": [
+        [
+          {
+            "node": "Notify High-Value Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Low-Priority Lead": {
+      "main": [
+        [
+          {
+            "node": "Notify Low-Priority Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "01860f3e-1c82-491c-bd63-079cee3deed3",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
+  },
+  "nodeGroups": [],
+  "id": "BGRCsVKBG0XBRcsd",
+  "tags": []
+}
