@@ -9,7 +9,7 @@
 
 A production-ready n8n pipeline that converts raw Typeform submissions into qualified, sales-ready intelligence with no human triage step in between. Every inbound lead is normalized, enriched against Apollo's company database, scored through a deterministic four-category rule set, and routed by that score: leads clearing the qualification threshold are handed to an LLM agent that generates a complete outreach strategy — pain points, recommended solution, value proposition, personalized opening line, subject line, and a confidence-scored deal estimate — while leads that don't qualify are logged with their disqualification reason and never reach the AI layer at all. Both outcomes are written to a dual-tab Google Sheets CRM and confirmed with a distinct branded email notification.
 
-> **Case study included.** This README documents the general-purpose architecture. A full business case study — problem framing, ROI narrative, and a real-world deployment scenario for a real estate brokerage — is included at [`case-study/ai-lead-enrichment-qualification-pipeline.pdf`](./case-study/ai-lead-enrichment-qualification-pipeline.pdf).
+> **Case study included.** This README documents the general-purpose architecture. A full business case study — problem framing, ROI narrative, and a real-world deployment scenario for a real estate brokerage — is included at [`case-study/ai-lead-enrichment-qualification-pipeline-case-study.pdf`](./case-study/ai-lead-enrichment-qualification-pipeline-case-study.pdf).
 
 ---
 
