@@ -22,6 +22,7 @@ The engineering philosophy that runs through every project here:
 - **Modular** — each node has a single responsibility. Pipelines are structured so that individual components can be swapped, extended, or reused without rebuilding the whole.
 - **Documented** — every workflow ships with a README explaining the business problem, the architecture, the tech stack, and a step-by-step execution walkthrough. Someone new to the project should be able to understand it in minutes.
 - **Business-focused** — the success criteria for each workflow is operational impact, not technical complexity. The simplest implementation that solves the problem reliably is the right one.
+- **Evidenced** — flagship workflows go further, pairing the README with a dedicated business case study, an architecture diagram built for non-technical stakeholders, and sample input/output pulled directly from a live execution. The goal is for each of these to read like an engineered product with a track record, not just an exported automation.
 
 ---
 
@@ -29,6 +30,9 @@ The engineering philosophy that runs through every project here:
 
 - **Event-driven automations** — workflows that react instantly to triggers rather than running on polling cycles
 - **Scheduled automations** — time-based pipelines that run unattended on a configurable frequency
+- **Business case study documentation** — flagship workflows pair their technical README with a dedicated case study PDF covering the business problem, ROI narrative, and a real-world deployment scenario
+- **Stakeholder-facing architecture diagrams** — a simplified, non-technical version of each flagship pipeline's flow, built for the person evaluating the system rather than the engineer maintaining it
+- **Real execution sample input/output** — documented artifacts pulled from a live run of the pipeline, not hypothetical placeholder data
 - **AI-powered lead enrichment** — third-party firmographic data pulled from Apollo's organization database to verify email domain quality and estimate company size for every inbound lead
 - **Deterministic lead scoring** — a four-category weighted rubric (domain quality, budget, company size, description richness) produces a consistent 0–100 score for every submission
 - **Business-rule-gated AI invocation** — a Switch node routes only qualifying leads into AI-powered analysis, keeping inference cost and latency scoped to leads that have already cleared an objective bar
@@ -61,10 +65,12 @@ The engineering philosophy that runs through every project here:
 |---|---|---|---|
 | 🔔 [Price Drop Notifier](./price-drop-notifier/) | Monitors a product page daily and sends an email alert the moment the price drops to a configured target | n8n · HTTP Request · HTML Extraction · IF · Gmail | [README](./price-drop-notifier/README.md) |
 | ⚙️ [Drive File Organizer](./drive-file-organizer/) | Detects new Google Drive uploads, classifies them by extension, moves them to the correct folder, logs every action to Sheets, and sends a confirmation email | n8n · Google Drive · Switch · JS Code · Google Sheets · Gmail | [README](./drive-file-organizer/README.md) |
-| 📋 [Client Form → CRM](./client-form-crm/) | Captures client inquiries from Typeform, scores leads against business rules, logs every submission to Notion, and routes prospects into three distinct automated email paths | n8n · Typeform · Set · JS Code · Notion · Switch · Gmail | [README](./client-form-crm/README.md) |
+| 📋 [Client Form → CRM](./client-form-crm/) | Captures client inquiries from Typeform, scores leads against business rules, logs every submission to Notion, and routes prospects into three distinct automated email paths | n8n · Typeform · Set · JS Code · Notion · Switch · Gmail | [README](./client-form-crm/README.md) · [Case Study](./client-form-crm/case-study/client-form-crm-case-study.pdf) |
 | 📰 [AI News Digest Automation](./ai-news-digest-automation/) | Monitors the AI industry RSS feed every four hours, generates LLM-powered summaries via OpenRouter, stores every article in a Notion knowledge base, and emails a curated executive briefing at 8 AM daily | n8n · RSS Feed · HTTP Request · JS Code · AI Agent · OpenRouter · Notion · Gmail | [README](./ai-news-digest-automation/README.md) |
 | 🧾 [Intelligent Invoice Processing Pipeline](./intelligent-invoice-processing-pipeline/) | Monitors Gmail for invoice attachments, OCR-processes each PDF, extracts structured fields via LangChain, archives to Drive, validates against four conditions, and routes to success logging or a compliance audit trail with distinct email notifications for each outcome | n8n · Gmail Trigger · OCR API · LangChain Extractor · OpenRouter · Google Drive · Google Sheets · Gmail | [README](./intelligent-invoice-processing-pipeline/README.md) |
-| 🤖 [AI Lead Enrichment & Qualification Pipeline](./ai-lead-enrichment-qualification-pipeline/) | Automatically enriches inbound Typeform leads, evaluates lead quality using deterministic scoring rules, generates AI-powered sales intelligence for qualified prospects, routes leads based on score thresholds, logs them into dedicated Google Sheets dashboards, and dispatches branded HTML notifications | n8n · Typeform · HTTP Request · JavaScript · AI Agent · OpenRouter · Google Sheets · Gmail | [README](./ai-lead-enrichment-qualification-pipeline/README.md) |
+| 🤖 [AI Lead Enrichment & Qualification Pipeline](./ai-lead-enrichment-qualification-pipeline/) | Automatically enriches inbound Typeform leads, evaluates lead quality using deterministic scoring rules, generates AI-powered sales intelligence for qualified prospects, routes leads based on score thresholds, logs them into dedicated Google Sheets dashboards, and dispatches branded HTML notifications | n8n · Typeform · HTTP Request · JavaScript · AI Agent · OpenRouter · Google Sheets · Gmail | [README](./ai-lead-enrichment-qualification-pipeline/README.md) · [Case Study](./ai-lead-enrichment-qualification-pipeline/case-study/ai-lead-enrichment-qualification-pipeline-case-study.pdf) |
+
+Two workflows — Client Form → CRM and AI Lead Enrichment & Qualification Pipeline — are documented as complete case studies: technical README, stakeholder-facing architecture diagram, sample input/output from a live execution, and a business case study PDF, all included in the workflow's own folder.
 
 ---
 
@@ -83,7 +89,7 @@ n8n-workflows/
 │   ├── ai-lead-enrichment-qualification-pipeline.json  # Importable n8n workflow
 │   ├── README.md
 │   ├── case-study/
-│   │   └── ai-lead-enrichment-qualification-pipeline.pdf   
+│   │   └── ai-lead-enrichment-qualification-pipeline-case-study.pdf   
 │   └── images/
 │       ├── workflow.png
 │       ├── workflow-architecture.png
@@ -184,7 +190,7 @@ Every business runs on repetitive processes. Someone checks a spreadsheet every 
 
 These tasks are not difficult — they are just consistent, predictable, and time-consuming in a way that scales badly. The larger the operation, the more of them exist, and the more they crowd out work that actually requires human judgment.
 
-Automation handles the predictable. This repository is a record of what that looks like in practice: real triggers, real data, real integrations, and outcomes that free up time rather than just demonstrating that automation is possible.
+Automation handles the predictable. This repository is a record of what that looks like in practice: real triggers, real data, real integrations, and outcomes that free up time rather than just demonstrating that automation is possible. For the workflows built out as full case studies, that record extends beyond the code itself — the business problem, the architecture, and a live execution trace are documented side by side, so the proof is available, not just asserted.
 
 The goal for each workflow is the same — that after it runs, a person's default assumption is that the task is handled, not that they need to go check.
 
@@ -247,7 +253,7 @@ The `Shaban27-dev/n8n-workflows` repository on GitHub, showing the six current w
 
 > ![Workflow](assets/featured-workflow.png)
 
-The AI Lead Enrichment & Qualification Pipeline in the n8n editor. The linear intake-and-scoring sequence — Typeform Trigger through Apollo enrichment, domain evaluation, and lead scoring — feeds into a Switch node that fans execution in two directions. Qualifying leads rise into a LangChain AI Agent sub-pipeline, complete with its connected chat model and structured output parser, before converging into Sheets logging and a high-value alert email. Disqualified leads bypass the AI layer entirely, routing directly into a separate Sheets tab and a lower-key confirmation email.
+The AI Lead Enrichment & Qualification Pipeline in the n8n editor. The linear intake-and-scoring sequence — Typeform Trigger through Apollo enrichment, domain evaluation, and lead scoring — feeds into a Switch node that fans execution in two directions. Qualifying leads rise into a LangChain AI Agent sub-pipeline, complete with its connected chat model and structured output parser, before converging into Sheets logging and a high-value alert email. Disqualified leads bypass the AI layer entirely, routing directly into a separate Sheets tab and a lower-key confirmation email. This is one of two workflows in the repository backed by a full business case study — an architecture diagram, sample input/output, and a real-world deployment narrative are all included alongside the code.
 
 ---
 
@@ -255,7 +261,7 @@ The AI Lead Enrichment & Qualification Pipeline in the n8n editor. The linear in
 
 > ![Sheets](assets/sheets-log.png)
 
-The `🔥 High-Value Leads` tab of the Inbound Lead Triage Hub spreadsheet. Each row records a qualified lead with its full enrichment and AI-generated detail: name, email, company, lead score, budget, priority, lead summary, pain points, recommended solution, value proposition, and outreach strategy. The adjacent `❄️ Low-Priority Leads` tab is visible in the sheet navigation bar, confirming both qualification outcomes are tracked within the same dashboard.
+The `🔥 High-Value Leads` tab of the Inbound Lead Triage Hub spreadsheet. Each row records a qualified lead with its full enrichment and AI-generated detail: name, email, company, lead score, budget, priority, lead summary, pain points, recommended solution, value proposition, and outreach strategy. The adjacent `❄️ Low-Priority Leads` tab is visible in the sheet navigation bar, confirming both qualification outcomes are tracked within the same dashboard — a single, live source of truth built from real executions rather than a hypothetical example.
 
 ---
 
@@ -263,7 +269,7 @@ The `🔥 High-Value Leads` tab of the Inbound Lead Triage Hub spreadsheet. Each
 
 > ![Email](assets/email-notification.png)
 
-The internal alert email dispatched the moment a lead clears the qualification threshold. A dark hero header carries a rocket emoji and the headline "High-Value Lead Identified," with a green pill badge displaying the lead score out of 100. The body confirms the lead was automatically enriched, analyzed by AI, and classified as a priority opportunity — the entry point into a fuller brief containing the AI-generated summary, pain points, recommended solution, and a one-click contact link.
+The internal alert email dispatched the moment a lead clears the qualification threshold. A dark hero header carries a rocket emoji and the headline "High-Value Lead Identified," with a green pill badge displaying the lead score out of 100. The body confirms the lead was automatically enriched, analyzed by AI, and classified as a priority opportunity — the entry point into a fuller brief containing the AI-generated summary, pain points, recommended solution, and a one-click contact link, putting a qualified opportunity in front of a decision-maker within seconds of the lead clearing the bar.
 
 ---
 
@@ -292,6 +298,7 @@ If you have a manual process that runs on a predictable pattern, it can probably
 | **Document Processing Automation** | OCR extraction, AI field parsing, validation pipelines, and structured logging for invoices, contracts, and business documents |
 | **AI Content Pipelines** | RSS monitoring, LLM-powered summarization, knowledge base construction, and scheduled digest delivery |
 | **CRM Automation** | Form-to-CRM pipelines with lead scoring, qualification routing, and automated client communication |
+| **Workflow Documentation & Case Studies** | Architecture diagrams, implementation guides, and business case studies that make a delivered automation easy for a client's team to understand, trust, and maintain |
 | **Google Workspace Automation** | Drive, Sheets, Gmail, and Calendar integrated into operational workflows |
 | **API Integration** | Connecting internal tools and third-party APIs through webhook and HTTP request pipelines |
 | **Python Automation** | Script-based automation for data processing, scraping, scheduling, and reporting |
@@ -308,5 +315,7 @@ If you have a manual process that runs on a predictable pattern, it can probably
 This repository is an actively growing portfolio of automation systems built around one principle: every workflow should solve a problem a real business actually has, and solve it in a way that is reliable enough to run without supervision.
 
 The projects here draw on event-driven architecture, AI-powered lead enrichment and qualification, deterministic scoring with AI-generated sales intelligence, AI-powered document processing, OCR-based data extraction, RSS-driven content intelligence, AI-powered summarization, dual-pipeline scheduling, form-triggered intake pipelines, CRM integration, Google Workspace automation, web scraping, and conditional workflow orchestration — applied to problems that repeat themselves every day in organizations of every size. Each one is documented, exportable, and ready to deploy.
+
+The two most fully built-out workflows go a step further, pairing the technical README with an architecture diagram written for non-technical stakeholders, sample input and output pulled from real executions, and a complete business case study covering the problem, the ROI narrative, and a concrete deployment scenario. The intent is for each of these to read like the record of an engineered product rather than an exported automation — a system built once, documented end-to-end, and proven to work.
 
 This repository is actively maintained with new production-ready workflows added regularly. Star the repository to stay updated.
