@@ -88,7 +88,7 @@ n8n-workflows/
 │       ├── workflow.png
 │       ├── workflow-architecture.png
 │       ├── sample-input.png
-│       ├── sample output.png
+│       ├── sample-output.png
 │       ├── sheets-log.png
 │       └── gmail-alert.png
 │
