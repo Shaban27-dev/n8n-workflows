@@ -82,12 +82,15 @@ n8n-workflows/
 ├── ai-lead-enrichment-qualification-pipeline/
 │   ├── ai-lead-enrichment-qualification-pipeline.json  # Importable n8n workflow
 │   ├── README.md
+│   ├── case-study/
+│   │   └── ai-lead-enrichment-qualification-pipeline.pdf   
 │   └── images/
 │       ├── workflow.png
-│       ├── high-value-leads.png
-│       ├── low-priority-leads.png
-│       ├── high-value-email.png
-│       └── low-priority-email.png
+│       ├── workflow-architecture.png
+│       ├── sample-input.png
+│       ├── sample output.png
+│       ├── sheets-log.png
+│       └── gmail-alert.png
 │
 ├── ai-news-digest-automation/
 │   ├── ai-news-digest-automation.json            # Importable n8n workflow
@@ -100,12 +103,18 @@ n8n-workflows/
 ├── client-form-crm/
 │   ├── client-form-crm.json                      # Importable n8n workflow
 │   ├── README.md
+│   ├── case-study/
+│   │   └── client-form-crm-case-study.pdf
 │   └── images/
 │       ├── workflow.png
+│       ├── workflow-architecture.png
+│       ├── lead-input.png
+│       ├── lead-output.png
 │       ├── notion-crm.png
 │       ├── high-budget-email.png
-│       ├── low-budget-email.png
-│       └── missing-info-email.png
+│       └── branch-emails/
+│           ├── low-budget-email.png
+│           └── missing-info-email.png 
 │
 ├── drive-file-organizer/
 │   ├── drive-file-organizer.json                 # Importable n8n workflow
