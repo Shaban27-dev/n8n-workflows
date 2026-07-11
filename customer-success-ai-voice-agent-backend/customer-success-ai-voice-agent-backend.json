@@ -1,0 +1,4177 @@
+{
+  "name": "Customer Success AI Voice Agent Backend",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f36c86ac-3555-4c8f-af0f-c8b23b6a67f6",
+              "name": "customer_name",
+              "value": "={{ $json.body.customer_name.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "b3d316d4-4bbd-43aa-920a-ca16079ba038",
+              "name": "business_name",
+              "value": "={{ $json.body.business_name.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "d8014208-eb32-4d92-a303-fbcb68eaab9a",
+              "name": "phone",
+              "value": "={{ $json.body.phone.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "77dc58fa-f050-408c-8b2d-298ab2f1f81d",
+              "name": "email",
+              "value": "={{ $json.body.email.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "20e5ebcd-24e3-4c08-a10a-d2f10f3a48a3",
+              "name": "call_outcome",
+              "value": "={{ $json.body.call_outcome.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "7fa874f6-71b2-4cc5-81a9-e85a03469132",
+              "name": "sentiment",
+              "value": "={{ $json.body.sentiment.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "183674bd-b1c3-4d07-a0a8-cf5418a7b152",
+              "name": "opportunity_details",
+              "value": "={{ $json.body.opportunity_details.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "87f4423d-5e30-4233-b19c-8a4eae3e5f30",
+              "name": "urgency",
+              "value": "={{ $json.body.urgency.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "720a8a05-357a-419a-be19-bfdac870f590",
+              "name": "products_needed",
+              "value": "={{ $json.body.products_needed.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "61d396dc-f5a3-4ea3-9580-fded3537114c",
+              "name": "quantity",
+              "value": "={{ Number($json.body.quantity) }}",
+              "type": "string"
+            },
+            {
+              "id": "7a50f98a-5465-4076-9e2e-817cac9aff14",
+              "name": "budget",
+              "value": "={{ $json.body.budget.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "624becb8-4840-4c1a-bd69-6bb10f1c903e",
+              "name": "timeframe",
+              "value": "={{ $json.body.timeframe.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "c83c2865-ba1b-4774-bf8b-63f1d6ce6ea0",
+              "name": "location",
+              "value": "={{ $json.body.location.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "d5f3bbae-4570-414e-ac88-5d4b8a911b16",
+              "name": "requested_rep",
+              "value": "={{ $json.body.requested_rep.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "33d347c2-866c-450c-a3e7-91317ac022e2",
+              "name": "preferred_follow_up_method",
+              "value": "={{ $json.body.preferred_follow_up_method.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "b2bc1654-6350-44bb-89a3-c338f58cc8e1",
+              "name": "short_call_summary",
+              "value": "={{ $json.body.short_call_summary.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "5911c255-0899-41df-afa6-0c384d50a6ca",
+              "name": "transcript_link",
+              "value": "={{ $json.body.transcript_link.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "70f18407-a927-4443-8f25-5575004bf59b",
+              "name": "recording_link",
+              "value": "={{ $json.body.recording_link.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "559346ac-79fa-4cee-953b-49bfffe6bcb4",
+              "name": "final_tag",
+              "value": "={{ $json.body.final_tag.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "757f233a-e50d-4729-ae38-fc3402633bfd",
+              "name": "next_action",
+              "value": "={{ $json.body.next_action.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -896,
+        640
+      ],
+      "id": "74921d20-aa15-4a05-88c2-fb3dfce0afc8",
+      "name": "Normalize Data"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "voice-summary",
+        "options": {
+          "responseData": "={\n  \"success\": true,\n  \"message\": \"Voice summary processed successfully\",\n  \"lead_id\": \"{{ $execution.id }}\"\n}"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1120,
+        640
+      ],
+      "id": "19d4d837-1c7d-4a88-a369-ec8948af59ff",
+      "name": "Voice Call Webhook",
+      "webhookId": "your-webhook-node-id",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json.body ?? $json;\n\nconst lead = { ...input };\nconst errors = [];\n\nconst isEmpty = (v) =>\n  v === undefined || v === null || String(v).trim() === '';\n\nconst allowedTags = [\n  'hot',\n  'warm',\n  'future',\n  'feedback only',\n  'voicemail',\n  'wrong contact',\n  'not interested',\n  'do-not-call',\n];\n\n// Normalize final_tag\nlead.final_tag = String(lead.final_tag || '').trim().toLowerCase();\n\n// Required: customer_name OR business_name\nif (isEmpty(lead.customer_name) && isEmpty(lead.business_name)) {\n  errors.push('At least one identifier is required (customer_name or business_name)');\n}\n\n// Required: phone OR email\nif (isEmpty(lead.phone) && isEmpty(lead.email)) {\n  errors.push('At least one contact method is required (phone or email)');\n}\n\n// Required individual fields\nconst requiredFields = [\n  'call_outcome',\n  'final_tag',\n  'short_call_summary',\n  'next_action',\n];\n\nfor (const field of requiredFields) {\n  if (isEmpty(lead[field])) {\n    errors.push(`${field} is missing`);\n  }\n}\n\n// Validate final_tag\nif (lead.final_tag && !allowedTags.includes(lead.final_tag)) {\n  errors.push(`final_tag must be one of: ${allowedTags.join(', ')}`);\n}\n\n// Add metadata\nlead.received_at = lead.received_at || new Date().toISOString();\nlead.lead_id = lead.lead_id || `${Date.now()}`;\nlead.is_valid = errors.length === 0;\nlead.validation_errors = errors;\nlead.raw_payload = JSON.stringify(input);\n\nreturn [{ json: lead }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        640
+      ],
+      "id": "f3cc1cb2-2448-47d5-81bf-beea7f5bd997",
+      "name": "Validate Lead"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "15d950ec-235f-4828-9462-30d5e540fa44",
+              "leftValue": "={{ $json.is_valid }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -448,
+        736
+      ],
+      "id": "77f3f4b4-c54d-4336-b262-26a15697e77d",
+      "name": "Is Lead Valid?"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_name": "={{ $json.customer_name }}",
+            "business_name": "={{ $json.business_name }}",
+            "phone": "={{ \"'\" + $json.phone }}'",
+            "email": "={{ $json.email }}",
+            "call_outcome": "={{ $json.call_outcome }}",
+            "sentiment": "={{ $json.sentiment }}",
+            "opportunity_details": "={{ $json.opportunity_details }}",
+            "urgency": "={{ $json.urgency }}",
+            "products_needed": "={{ $json.products_needed }}",
+            "quantity": "={{ $json.quantity }}",
+            "budget": "={{ $json.budget }}",
+            "timeframe": "={{ $json.timeframe }}",
+            "location": "={{ $json.location }}",
+            "requested_rep": "={{ $json.requested_rep }}",
+            "preferred_follow_up_method": "={{ $json.preferred_follow_up_method }}",
+            "short_call_summary": "={{ $json.short_call_summary }}",
+            "transcript_link": "={{ $json.transcript_link }}",
+            "recording_link": "={{ $json.recording_link }}",
+            "final_tag": "={{ $json.final_tag }}",
+            "next_action": "={{ $json.next_action }}",
+            "status": "New",
+            "received_at": "={{ $now.toISO() }}",
+            "lead_id": "={{ $execution.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        640
+      ],
+      "id": "50388b90-b0f6-469d-9225-e701b0e53115",
+      "name": "Append CRM Lead",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1233122805,
+          "mode": "list",
+          "cachedResultName": "Validation Errors",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=1233122805"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "received_at": "={{ $now.toISO() }}",
+            "lead_id": "={{ $json.lead_id }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "business_name": "={{ $json.business_name }}",
+            "raw_payload": "={{ $json.raw_payload }}",
+            "validation_errors": "={{ $json.validation_errors.join('; ') }}",
+            "phone": "={{ \"'\" + $json.phone }}'",
+            "email": "={{ $json.email }}",
+            "final_tag": "={{ $json.final_tag }}",
+            "is_valid": "={{ $json.is_valid }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "is_valid",
+              "displayName": "is_valid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "validation_errors",
+              "displayName": "validation_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "raw_payload",
+              "displayName": "raw_payload",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        832
+      ],
+      "id": "cf05b220-10e5-46fc-b805-c8724258ca17",
+      "name": "Append Validation Error",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "hot",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7ec5238c-e3fb-419e-9bc1-923414bd3e50"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "hot"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c43981dc-0aaa-4e00-ba5b-d6511370b591",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "warm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "warm"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ca982376-0713-42dc-81bd-ffbe495ed628",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "future",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "future"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e698b394-b4e3-4783-b3fb-1102fac440fc",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "feedback only",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "feedback only"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fedfa762-c7c5-480c-a4ac-fa68b54298e2",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "voicemail",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voicemail"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2c7f9240-28cc-4da8-b425-4b90f07cd197",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "wrong contact",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "wrong contact"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4cc3637b-20ed-4a4a-a7bd-8d6023ae9026",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "not interested",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "not interested"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "af8ed176-7ef1-4905-90e8-1360c946423c",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "do-not-call",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "do-not-call"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bf256993-a643-4a8b-bad1-97078b457fee",
+                    "leftValue": "={{ $json.final_tag }}",
+                    "rightValue": "fallback",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "fallback"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        528
+      ],
+      "id": "cb469030-59e7-4ab1-856f-63e194bda153",
+      "name": "Route by Final Tag"
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=🔥 HOT LEAD: {{ $json.customer_name }} | {{ $json.business_name }}",
+        "message": "=<!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\"> <style> body{     font-family: Arial, Helvetica, sans-serif;     color:#333;     line-height:1.6; } .container{     max-width:700px;     margin:auto; } .header{     background:#d32f2f;     color:white;     padding:16px;     font-size:22px;     font-weight:bold; } .section{     margin-top:20px; } table{     width:100%;     border-collapse:collapse; } td{     border:1px solid #ddd;     padding:10px;     vertical-align:top; } .label{     background:#f5f5f5;     font-weight:bold;     width:35%; } .summary{     background:#fff8e1;     border-left:5px solid #ff9800;     padding:15px;     margin-top:20px; } .footer{     margin-top:30px;     font-size:12px;     color:#777; } </style> </head>  <body>  <div class=\"container\">  <div class=\"header\"> 🔥 High Priority Lead Notification </div>  <p> A new <strong>Hot Lead</strong> has been captured by the AI Voice Agent and requires immediate sales follow-up. </p>  <div class=\"section\">  <table>  <tr> <td class=\"label\">Customer</td> <td>{{ $json.customer_name }}</td> </tr>  <tr> <td class=\"label\">Business</td> <td>{{ $json.business_name }}</td> </tr>  <tr> <td class=\"label\">Phone</td> <td>{{ $json.phone }}</td> </tr>  <tr> <td class=\"label\">Email</td> <td>{{ $json.email }}</td> </tr>  <tr> <td class=\"label\">Call Outcome</td> <td>{{ $json.call_outcome }}</td> </tr>  <tr> <td class=\"label\">Sentiment</td> <td>{{ $json.sentiment }}</td> </tr>  <tr> <td class=\"label\">Urgency</td> <td>{{ $json.urgency }}</td> </tr>  <tr> <td class=\"label\">Budget</td> <td>{{ $json.budget }}</td> </tr>  <tr> <td class=\"label\">Quantity</td> <td>{{ $json.quantity }}</td> </tr>  <tr> <td class=\"label\">Timeframe</td> <td>{{ $json.timeframe }}</td> </tr>  <tr> <td class=\"label\">Location</td> <td>{{ $json.location }}</td> </tr>  <tr> <td class=\"label\">Requested Representative</td> <td>{{ $json.requested_rep || \"Not specified\" }}</td> </tr>  <tr> <td class=\"label\">Preferred Follow-up</td> <td>{{ $json.preferred_follow_up_method }}</td> </tr>  </table>  </div>  <div class=\"summary\">  <h3>Opportunity Details</h3>  <p>{{ $json.opportunity_details }}</p>  <h3>Call Summary</h3>  <p>{{ $json.short_call_summary }}</p>  <h3>Recommended Next Action</h3>  <p>{{ $json.next_action }}</p>  </div>  <div class=\"section\">  <p><strong>Transcript:</strong></p>  <p> <a href=\"{{ $json.transcript_link }}\"> {{ $json.transcript_link }} </a> </p>  <p><strong>Recording:</strong></p>  <p> <a href=\"{{ $json.recording_link }}\"> {{ $json.recording_link }} </a> </p>  </div>  <div class=\"footer\">  This notification was generated automatically by the AI Voice Agent workflow.<br>  Please contact the customer as soon as possible.  </div>  </div>  </body> </html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        144
+      ],
+      "id": "ceaebbee-c461-444c-8d8c-b43737ec4535",
+      "name": "Hot Lead Email",
+      "webhookId": "your-webhook-id-for-hot-lead-email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=🟠 WARM LEAD: {{ $json.customer_name }} | {{ $json.business_name }}",
+        "message": "=<!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\"> <style> body{     font-family: Arial, Helvetica, sans-serif;     color:#333;     line-height:1.6; } .container{     max-width:700px;     margin:auto; } .header{     background:#f57c00;     color:white;     padding:16px;     font-size:22px;     font-weight:bold; } .section{     margin-top:20px; } table{     width:100%;     border-collapse:collapse; } td{     border:1px solid #ddd;     padding:10px;     vertical-align:top; } .label{     background:#f5f5f5;     font-weight:bold;     width:35%; } .summary{     background:#fff8e1;     border-left:5px solid #f57c00;     padding:15px;     margin-top:20px; } .footer{     margin-top:30px;     font-size:12px;     color:#777; } </style> </head>  <body>  <div class=\"container\">  <div class=\"header\"> 🟠 Warm Lead Notification </div>  <p> A new <strong>Warm Lead</strong> has been identified by the AI Voice Agent. The customer has shown genuine interest and should be followed up by the sales team in the near future. </p>  <div class=\"section\">  <table>  <tr> <td class=\"label\">Customer</td> <td>{{ $json.customer_name }}</td> </tr>  <tr> <td class=\"label\">Business</td> <td>{{ $json.business_name }}</td> </tr>  <tr> <td class=\"label\">Phone</td> <td>{{ $json.phone }}</td> </tr>  <tr> <td class=\"label\">Email</td> <td>{{ $json.email }}</td> </tr>  <tr> <td class=\"label\">Call Outcome</td> <td>{{ $json.call_outcome }}</td> </tr>  <tr> <td class=\"label\">Sentiment</td> <td>{{ $json.sentiment }}</td> </tr>  <tr> <td class=\"label\">Urgency</td> <td>{{ $json.urgency }}</td> </tr>  <tr> <td class=\"label\">Budget</td> <td>{{ $json.budget }}</td> </tr>  <tr> <td class=\"label\">Quantity</td> <td>{{ $json.quantity }}</td> </tr>  <tr> <td class=\"label\">Timeframe</td> <td>{{ $json.timeframe }}</td> </tr>  <tr> <td class=\"label\">Location</td> <td>{{ $json.location }}</td> </tr>  <tr> <td class=\"label\">Requested Representative</td> <td>{{ $json.requested_rep || \"Not specified\" }}</td> </tr>  <tr> <td class=\"label\">Preferred Follow-up</td> <td>{{ $json.preferred_follow_up_method }}</td> </tr>  </table>  </div>  <div class=\"summary\">  <h3>Opportunity Details</h3>  <p>{{ $json.opportunity_details }}</p>  <h3>Call Summary</h3>  <p>{{ $json.short_call_summary }}</p>  <h3>Recommended Next Action</h3>  <p>{{ $json.next_action }}</p>  </div>  <div class=\"section\">  <p><strong>Transcript:</strong></p>  <p> <a href=\"{{ $json.transcript_link }}\"> {{ $json.transcript_link }} </a> </p>  <p><strong>Recording:</strong></p>  <p> <a href=\"{{ $json.recording_link }}\"> {{ $json.recording_link }} </a> </p>  </div>  <div class=\"footer\">  This notification was generated automatically by the AI Voice Agent workflow.<br>  Recommended action: Assign this lead to a sales representative and schedule a follow-up within the next few business days.  </div>  </div>  </body> </html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        320
+      ],
+      "id": "14815664-0576-4e11-8d8f-46858ccc7205",
+      "name": "Warm Lead Email",
+      "webhookId": "your-webhook-id-for-warm-lead-email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=🔵 FUTURE LEAD: {{ $json.customer_name }} | {{ $json.business_name }}",
+        "message": "=<!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\"> <style> body{     font-family: Arial, Helvetica, sans-serif;     color:#333;     line-height:1.6; } .container{     max-width:700px;     margin:auto; } .header{     background:#1976d2;     color:white;     padding:16px;     font-size:22px;     font-weight:bold; } .section{     margin-top:20px; } table{     width:100%;     border-collapse:collapse; } td{     border:1px solid #ddd;     padding:10px;     vertical-align:top; } .label{     background:#f5f5f5;     font-weight:bold;     width:35%; } .summary{     background:#e3f2fd;     border-left:5px solid #1976d2;     padding:15px;     margin-top:20px; } .footer{     margin-top:30px;     font-size:12px;     color:#777; } </style> </head>  <body>  <div class=\"container\">  <div class=\"header\"> 🔵 Future Opportunity </div>  <p> The AI Voice Agent has identified a <strong>Future Lead</strong>. The customer has expressed interest but is not planning an immediate purchase. This lead should be added to the nurture pipeline and followed up at the appropriate time. </p>  <div class=\"section\">  <table>  <tr><td class=\"label\">Customer</td><td>{{ $json.customer_name }}</td></tr> <tr><td class=\"label\">Business</td><td>{{ $json.business_name }}</td></tr> <tr><td class=\"label\">Phone</td><td>{{ $json.phone }}</td></tr> <tr><td class=\"label\">Email</td><td>{{ $json.email }}</td></tr> <tr><td class=\"label\">Call Outcome</td><td>{{ $json.call_outcome }}</td></tr> <tr><td class=\"label\">Sentiment</td><td>{{ $json.sentiment }}</td></tr> <tr><td class=\"label\">Urgency</td><td>{{ $json.urgency }}</td></tr> <tr><td class=\"label\">Budget</td><td>{{ $json.budget }}</td></tr> <tr><td class=\"label\">Timeframe</td><td>{{ $json.timeframe }}</td></tr> <tr><td class=\"label\">Preferred Follow-up</td><td>{{ $json.preferred_follow_up_method }}</td></tr>  </table>  </div>  <div class=\"summary\">  <h3>Opportunity Details</h3>  <p>{{ $json.opportunity_details }}</p>  <h3>Call Summary</h3>  <p>{{ $json.short_call_summary }}</p>  <h3>Recommended Next Action</h3>  <p>{{ $json.next_action }}</p>  </div>  <div class=\"section\">  <p><strong>Transcript</strong></p>  <p> <a href=\"{{ $json.transcript_link }}\"> {{ $json.transcript_link }} </a> </p>  <p><strong>Recording</strong></p>  <p> <a href=\"{{ $json.recording_link }}\"> {{ $json.recording_link }} </a> </p>  </div>  <div class=\"footer\">  This notification was generated automatically by the AI Voice Agent workflow.<br>  Recommended action: Add this lead to the nurture pipeline and schedule a follow-up based on the customer's expected timeframe.  </div>  </div>  </body> </html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        496
+      ],
+      "id": "aa965740-e8b4-4974-bb6d-25e0dbac92a8",
+      "name": "Future Lead Email",
+      "webhookId": "your-webhook-id-for-future-lead-email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=📞 VOICEMAIL: Callback Required | {{ $json.customer_name }} | {{ $json.business_name }}",
+        "message": "=<!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\"> <style> body{     font-family:Arial,Helvetica,sans-serif;     color:#333;     line-height:1.6; } .container{     max-width:700px;     margin:auto; } .header{     background:#546e7a;     color:white;     padding:16px;     font-size:22px;     font-weight:bold; } table{     width:100%;     border-collapse:collapse;     margin-top:20px; } td{     border:1px solid #ddd;     padding:10px; } .label{     width:35%;     font-weight:bold;     background:#f5f5f5; } .notice{     margin-top:20px;     background:#eceff1;     border-left:5px solid #607d8b;     padding:15px; } .footer{     margin-top:30px;     font-size:12px;     color:#777; } </style> </head>  <body>  <div class=\"container\">  <div class=\"header\"> 📞 Voicemail Detected </div>  <p> The AI Voice Agent was unable to speak with the customer because the call reached voicemail. No sales qualification could be completed. </p>  <table>  <tr> <td class=\"label\">Customer</td> <td>{{ $json.customer_name }}</td> </tr>  <tr> <td class=\"label\">Business</td> <td>{{ $json.business_name }}</td> </tr>  <tr> <td class=\"label\">Phone</td> <td>{{ $json.phone }}</td> </tr>  <tr> <td class=\"label\">Email</td> <td>{{ $json.email }}</td> </tr>  <tr> <td class=\"label\">Call Outcome</td> <td>{{ $json.call_outcome }}</td> </tr>  <tr> <td class=\"label\">Final Tag</td> <td>{{ $json.final_tag }}</td> </tr>  <tr> <td class=\"label\">Preferred Follow-up</td> <td>{{ $json.preferred_follow_up_method || \"Phone\" }}</td> </tr>  </table>  <div class=\"notice\">  <h3>Recommended Action</h3>  <p>{{ $json.next_action }}</p>  <p>Please schedule another outbound call at the earliest suitable time.</p>  </div>  <div class=\"footer\">  This notification was generated automatically by the AI Voice Agent workflow.  </div>  </div>  </body> </html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        672
+      ],
+      "id": "a93fb8dd-74fa-40a6-86e0-6e3c4d51e83a",
+      "name": "Voicemail Email",
+      "webhookId": "your-webhook-id-for-voicemail-email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=⚠️ WRONG CONTACT: Contact Verification Required | {{ $json.business_name }}",
+        "message": "=<!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\"> <style> body{     font-family:Arial,Helvetica,sans-serif;     color:#333;     line-height:1.6; } .container{     max-width:700px;     margin:auto; } .header{     background:#8e24aa;     color:white;     padding:16px;     font-size:22px;     font-weight:bold; } table{     width:100%;     border-collapse:collapse;     margin-top:20px; } td{     border:1px solid #ddd;     padding:10px; } .label{     width:35%;     background:#f5f5f5;     font-weight:bold; } .notice{     margin-top:20px;     background:#f3e5f5;     border-left:5px solid #8e24aa;     padding:15px; } .footer{     margin-top:30px;     font-size:12px;     color:#777; } </style> </head>  <body>  <div class=\"container\">  <div class=\"header\"> ⚠️ Wrong Contact Reached </div>  <p> The AI Voice Agent was unable to speak with the intended customer because the phone call reached the wrong contact. The customer record should be reviewed before another outbound call is attempted. </p>  <table>  <tr> <td class=\"label\">Expected Customer</td> <td>{{ $json.customer_name }}</td> </tr>  <tr> <td class=\"label\">Business</td> <td>{{ $json.business_name }}</td> </tr>  <tr> <td class=\"label\">Phone Number Called</td> <td>{{ $json.phone }}</td> </tr>  <tr> <td class=\"label\">Email</td> <td>{{ $json.email }}</td> </tr>  <tr> <td class=\"label\">Call Outcome</td> <td>{{ $json.call_outcome }}</td> </tr>  <tr> <td class=\"label\">Final Tag</td> <td>{{ $json.final_tag }}</td> </tr>  </table>  <div class=\"notice\">  <h3>Call Summary</h3>  <p>{{ $json.short_call_summary }}</p>  <h3>Recommended Next Action</h3>  <p>{{ $json.next_action }}</p>  <p> Please verify the customer's contact information and update the CRM before attempting another call. </p>  </div>  <div class=\"footer\">  This notification was generated automatically by the AI Voice Agent workflow.  </div>  </body> </html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        848
+      ],
+      "id": "1a4304f3-7ef1-47a4-96ea-7ec01591c0c8",
+      "name": "Wrong Contact Email",
+      "webhookId": "your-webhook-id-for-wrong-contact-email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "🚨 AI Voice Agent Alert: Unhandled Lead Classification Detected",
+        "message": "=<!DOCTYPE html> <html> <head> <meta charset=\"UTF-8\"> <style> body{     font-family:Arial,Helvetica,sans-serif;     color:#333;     line-height:1.6; } .container{     max-width:700px;     margin:auto; } .header{     background:#c62828;     color:white;     padding:16px;     font-size:22px;     font-weight:bold; } table{     width:100%;     border-collapse:collapse;     margin-top:20px; } td{     border:1px solid #ddd;     padding:10px; } .label{     width:35%;     background:#f5f5f5;     font-weight:bold; } .notice{     margin-top:20px;     background:#ffebee;     border-left:5px solid #c62828;     padding:15px; } .footer{     margin-top:30px;     font-size:12px;     color:#777; } </style> </head>  <body>  <div class=\"container\">  <div class=\"header\"> 🚨 Workflow Attention Required </div>  <p> The AI Voice Agent workflow received a lead that could not be routed to any configured category. This indicates an unexpected value or workflow configuration issue that requires review. </p>  <table>  <tr> <td class=\"label\">Customer</td> <td>{{ $json.customer_name }}</td> </tr>  <tr> <td class=\"label\">Business</td> <td>{{ $json.business_name }}</td> </tr>  <tr> <td class=\"label\">Phone</td> <td>{{ $json.phone }}</td> </tr>  <tr> <td class=\"label\">Call Outcome</td> <td>{{ $json.call_outcome }}</td> </tr>  <tr> <td class=\"label\">Received Final Tag</td> <td>{{ $json.final_tag }}</td> </tr>  <tr> <td class=\"label\">Sentiment</td> <td>{{ $json.sentiment }}</td> </tr>  </table>  <div class=\"notice\">  <h3>Validation Summary</h3>  <p>{{ $json.short_call_summary }}</p>  <h3>Recommended Action</h3>  <p> Review the workflow configuration and verify that the <strong>final_tag</strong> value is supported by the routing logic before processing this lead further. </p>  </div>  <div class=\"footer\">  This email was automatically generated by the AI Voice Agent workflow because an unexpected routing condition occurred.  </div>  </div>  </body> </html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        1024
+      ],
+      "id": "366988a9-a244-46c3-a657-5ef18981869e",
+      "name": "Fallback Alert Email",
+      "webhookId": "your-webhook-id-for-fallback-alert-email",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-OAuth2-credential-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0",
+          "mode": "url"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "notes": "Immediate follow-up required",
+            "assigned_to": "Sales Team",
+            "status": "New",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        144
+      ],
+      "id": "bc5cda6d-bef3-4c50-a4e8-277cf7f7a7d1",
+      "name": "Update CRM - Hot",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Follow-up Required",
+            "assigned_to": "Sales Team",
+            "notes": "Schedule follow-up",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        320
+      ],
+      "id": "20798796-7cd8-4270-abbe-a692a98caf22",
+      "name": "Update CRM - Warm",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Nurture",
+            "notes": "Future opportunity - Add to nurture campaign.",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        496
+      ],
+      "id": "dd9bfcc1-9fab-4e26-bd83-e6b701f73432",
+      "name": "Update CRM - Future",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Callback Required",
+            "notes": "Reached voicemail. Customer unavailable. Callback required.",
+            "assigned_to": "Sales Team",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        672
+      ],
+      "id": "de58d849-bb61-4339-98ee-5bb264210f65",
+      "name": "Update CRM - Voicemail",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Contact Verification Required",
+            "notes": "Wrong contact reached. Verify customer phone number or contact details before the next call.",
+            "assigned_to": "Sales Operations",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        848
+      ],
+      "id": "e3c560b5-08ac-416a-96fb-5b36e43f5496",
+      "name": "Update CRM - Wrong Contact",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Closed - Not Interested",
+            "notes": "Customer is not interested at this time. No further action required unless circumstances change.",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        736
+      ],
+      "id": "3cf96355-afa1-4fcb-a24b-46caf4820e39",
+      "name": "Update CRM - Not Interested",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Do Not Call",
+            "notes": "Customer requested to be added to the Do Not Call list. Future outbound calls must not be made.",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        912
+      ],
+      "id": "4dcf8ad2-e22f-4c9f-b3fc-9779ffeba5fd",
+      "name": "Update CRM - Do Not Call",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Workflow Review Required",
+            "assigned_to": "Automation Administrator",
+            "notes": "Lead routed to fallback branch. Review final_tag and workflow routing configuration.",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        1024
+      ],
+      "id": "588c9958-fa5a-4ac3-8951-9ec20d1dad95",
+      "name": "Update CRM - Fallback",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "CRM Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Feedback Received",
+            "notes": "Customer provided feedback. Review and respond if necessary.",
+            "assigned_to": "Account Manager",
+            "lead_id": "={{ $('Append CRM Lead').item.json.lead_id }}"
+          },
+          "matchingColumns": [
+            "lead_id"
+          ],
+          "schema": [
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_name",
+              "displayName": "business_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_outcome",
+              "displayName": "call_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "opportunity_details",
+              "displayName": "opportunity_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "products_needed",
+              "displayName": "products_needed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timeframe",
+              "displayName": "timeframe",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "requested_rep",
+              "displayName": "requested_rep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_follow_up_method",
+              "displayName": "preferred_follow_up_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_call_summary",
+              "displayName": "short_call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript_link",
+              "displayName": "transcript_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recording_link",
+              "displayName": "recording_link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_tag",
+              "displayName": "final_tag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "assigned_to",
+              "displayName": "assigned_to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "follow_up_date",
+              "displayName": "follow_up_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        560
+      ],
+      "id": "a0ae1a5e-8592-4675-bf9b-7622fe2a8a24",
+      "name": "Update CRM - Feedback Only",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        304
+      ],
+      "id": "4e33496c-0c39-4db0-8781-b94f480c9321",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "your-google-sheet-id",
+          "mode": "list",
+          "cachedResultName": "AI Voice Agent CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1432215911,
+          "mode": "list",
+          "cachedResultName": "Workflow Errors",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=1432215911"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "occurred_at": "={{ $now.toISO() }}",
+            "execution_id": "={{ $json.execution.id }}",
+            "workflow_name": "={{ $json.workflow.name }}",
+            "error_message": "={{ $json.execution.error.message }}",
+            "error_details": "={{ $json.execution.error.stack }}",
+            "failed_node": "={{ $json.execution.lastNodeExecuted }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "failed_node",
+              "displayName": "failed_node",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_details",
+              "displayName": "error_details",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -912,
+        304
+      ],
+      "id": "319bef11-8129-4637-8664-34d7bafeaeab",
+      "name": "Append Workflow Errors",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "your-google-sheets-OAuth2-credential-id",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Input Validation\n\nValidates required fields before CRM logging.",
+        "height": 112,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        496
+      ],
+      "id": "68df0505-fb50-4c95-9e04-1dd0f7526986",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "CRM Logging\n\nAppends validated customer summaries to the CRM Leads sheet.",
+        "height": 128
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        480
+      ],
+      "id": "ee7b45b5-a518-435c-ab93-7837bbb709fe",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Lead Routing\n\nRoutes leads by final_tag.",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        912
+      ],
+      "id": "0468cc0d-6c86-4cad-9db4-e5e7af7abb44",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Sales Notifications\n\nSends notifications for Hot, Warm, Future, Voicemail, Wrong Contact, and Fallback scenarios."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -48
+      ],
+      "id": "bb5e43d0-3713-499d-beb6-e4731b4d3dc8",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "CRM Status Updates\n\nUpdates status, owner, notes, and follow-up fields.",
+        "height": 112
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "7c35603e-a01a-441e-88a6-d48a7a3c58b5",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Error Handling\n\nValidation errors and workflow execution errors are logged separately.",
+        "height": 128
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        144
+      ],
+      "id": "676b38d2-81fd-4ce0-8d55-9313cf97c4b4",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize Data": {
+      "main": [
+        [
+          {
+            "node": "Validate Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice Call Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Lead": {
+      "main": [
+        [
+          {
+            "node": "Is Lead Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Lead Valid?": {
+      "main": [
+        [
+          {
+            "node": "Append CRM Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append Validation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append CRM Lead": {
+      "main": [
+        [
+          {
+            "node": "Route by Final Tag",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Final Tag": {
+      "main": [
+        [
+          {
+            "node": "Hot Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Future Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update CRM - Feedback Only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Voicemail Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wrong Contact Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update CRM - Not Interested",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update CRM - Do Not Call",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fallback Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hot Lead Email": {
+      "main": [
+        [
+          {
+            "node": "Update CRM - Hot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Warm Lead Email": {
+      "main": [
+        [
+          {
+            "node": "Update CRM - Warm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Future Lead Email": {
+      "main": [
+        [
+          {
+            "node": "Update CRM - Future",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voicemail Email": {
+      "main": [
+        [
+          {
+            "node": "Update CRM - Voicemail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wrong Contact Email": {
+      "main": [
+        [
+          {
+            "node": "Update CRM - Wrong Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Alert Email": {
+      "main": [
+        [
+          {
+            "node": "Update CRM - Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CRM - Warm": {
+      "main": [
+        []
+      ]
+    },
+    "Update CRM - Future": {
+      "main": [
+        []
+      ]
+    },
+    "Update CRM - Voicemail": {
+      "main": [
+        []
+      ]
+    },
+    "Update CRM - Wrong Contact": {
+      "main": [
+        []
+      ]
+    },
+    "Update CRM - Fallback": {
+      "main": [
+        []
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Append Workflow Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "",
+  "meta": {
+  },
+  "nodeGroups": [],
+  "id": "x4Zo8z93NMFrSmYq",
+  "tags": [
+    {
+      "name": "🤖 AI",
+      "id": "JlalDtiukmh4eNrz",
+      "updatedAt": "2026-07-09T17:59:23.448Z",
+      "createdAt": "2026-07-09T17:59:23.448Z"
+    },
+    {
+      "name": "🏭 Production-grade",
+      "id": "BLyCo53QrSxT1rcS",
+      "updatedAt": "2026-07-09T17:59:34.448Z",
+      "createdAt": "2026-07-09T17:59:34.448Z"
+    }
+  ]
+}
