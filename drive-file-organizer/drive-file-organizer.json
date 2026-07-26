@@ -3,41 +3,6 @@
   "nodes": [
     {
       "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "triggerOn": "specificFolder",
-        "folderToWatch": {
-          "__rl": true,
-          "value": "1vSjZUmpuUwS0FVcFTI7cnQLFHsRUJc6C",
-          "mode": "list",
-          "cachedResultName": "Uploads",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-folder-id-here"
-        },
-        "event": "fileCreated",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDriveTrigger",
-      "typeVersion": 1,
-      "position": [
-        -368,
-        192
-      ],
-      "id": "05d9f93e-54f7-41b6-a7c4-d96ebb5a9037",
-      "name": "Google Drive Trigger",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
-          "name": "Google Drive account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "operation": "update",
         "fileId": {
           "__rl": true,
@@ -50,14 +15,14 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        64,
-        112
+        320,
+        208
       ],
       "id": "a4ec8136-dbc7-48dc-b824-0aa8bd6c64bb",
       "name": "Update PDFs",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
@@ -76,14 +41,14 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        64,
-        272
+        320,
+        496
       ],
       "id": "901ae3fe-ceb3-4f12-b221-7e84b176b090",
       "name": "Update Documents",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
@@ -102,137 +67,21 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        64,
-        -48
+        320,
+        16
       ],
       "id": "9cb13ef2-dff4-4bd9-802e-e9d1283df9b9",
       "name": "Update Images",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
     },
     {
       "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.fileExtension }}",
-                    "rightValue": "=png",
-                    "operator": {
-                      "type": "string",
-                      "operation": "contains"
-                    },
-                    "id": "f554ac0d-3b2f-433b-81e6-6c5f2c4b1050"
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Images folder"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "a1ce97f4-cf8e-4e10-b660-088c02ac89f9",
-                    "leftValue": "={{ $json.fileExtension }}",
-                    "rightValue": "=pdf",
-                    "operator": {
-                      "type": "string",
-                      "operation": "contains"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "PDFs folder"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "744124d7-4a52-4f10-ac52-d3e424f148fb",
-                    "leftValue": "={{ $json.fileExtension }}",
-                    "rightValue": "=docx",
-                    "operator": {
-                      "type": "string",
-                      "operation": "contains"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Documents folder"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "e7f52ddc-4693-4595-9e8f-d2773ffa654e",
-                    "leftValue": "={{ $json.fileExtension }}",
-                    "rightValue": "csv",
-                    "operator": {
-                      "type": "string",
-                      "operation": "contains"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Spreadsheets Folder"
-            }
-          ]
-        },
-        "options": {
-          "fallbackOutput": "extra",
-          "renameFallbackOutput": "Unsupported Files "
-        }
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        -160,
-        144
-      ],
-      "id": "1d7de7a1-5016-4702-a494-6b389082b236",
-      "name": "Check File Type"
-    },
-    {
-      "parameters": {
-        "sendTo": "youremail@gmail.com",
+        "sendTo": "your-email@example.com",
         "subject": "=⚙️ File Organizer: {{ $json.Status }}",
         "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>File Automation Alert</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f6f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\">\n  <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"background-color: #f4f6f8; padding: 40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"100%\" id=\"email-card\" style=\"max-width: 560px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e1e4e8; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); overflow: hidden; border-collapse: separate;\">\n          \n          <tr>\n            <td height=\"4\" style=\"background: linear-gradient(90deg, #3b82f6, #10b981); line-height: 4px; font-size: 0;\">&nbsp;</td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 32px 32px 20px 32px;\">\n              <div style=\"display: inline-block; background-color: #eff6ff; color: #1e40af; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 12px; border-radius: 20px; margin-bottom: 16px;\">\n                ⚙️ Core Automation Engine\n              </div>\n              <h2 style=\"margin: 0; font-size: 22px; font-weight: 700; color: #1f2937; letter-spacing: -0.02em;\">\n                File Successfully Organized\n              </h2>\n              <p style=\"margin: 8px 0 0 0; font-size: 14px; color: #6b7280; line-height: 1.5;\">\n                The automated file processing workflow parsed, categorized, and re-routed a new incoming asset from your connected Google Drive storage pipeline.\n              </p>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 0 32px 24px 32px;\">\n              <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"background-color: #f8fafc; border-radius: 8px; border: 1px solid #edf2f7; border-collapse: collapse;\">\n                \n                <tr style=\"border-bottom: 1px solid #edf2f7;\">\n                  <td width=\"35%\" style=\"padding: 14px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em;\">File Name</td>\n                  <td style=\"padding: 14px 16px; font-size: 14px; font-weight: 500; color: #0f172a; word-break: break-all;\">\n                    {{ $json[\"File Name\"] }}\n                  </td>\n                </tr>\n\n                <tr style=\"border-bottom: 1px solid #edf2f7;\">\n                  <td style=\"padding: 14px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em;\">File Extension</td>\n                  <td style=\"padding: 14px 16px; font-size: 14px; font-weight: 600; color: #2563eb;\">\n                    <span style=\"background-color: #e0f2fe; padding: 2px 6px; border-radius: 4px; font-family: monospace;\">.{{ $json[\"File Extension\"] }}</span>\n                  </td>\n                </tr>\n\n                <tr style=\"border-bottom: 1px solid #edf2f7;\">\n                  <td style=\"padding: 14px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em;\">Pipeline Route</td>\n                  <td style=\"padding: 14px 16px; font-size: 14px; font-weight: 600; color: #059669;\">\n                    ✅ {{ $json[\"Status\"] }}\n                  </td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding: 14px 16px; font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.03em;\">Processed At</td>\n                  <td style=\"padding: 14px 16px; font-size: 14px; color: #334155;\">\n                    {{ $json[\"Timestamp\"] }}\n                  </td>\n                </tr>\n\n              </table>\n            </td>\n          </tr>\n\n          <tr>\n            <td style=\"padding: 0 32px 32px 32px;\">\n              <p style=\"margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5; text-align: center;\">\n                This database action has been compiled and safely recorded inside your master operational audit logs. No manual sorting intervention is required.\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n        <table width=\"100%\" style=\"max-width: 560px; margin-top: 20px;\">\n          <tr>\n            <td style=\"text-align: center; font-size: 12px; color: #94a3b8; line-height: 1.5;\">\n              Sent autonomously by your production instance on <strong style=\"color: #64748b;\">n8n.shaban.dev</strong>.<br>\n              To adjust systemic directory rules, open the workflow canvas editor directly.\n            </td>\n          </tr>\n        </table>\n\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
         "options": {
@@ -242,15 +91,15 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        800,
-        192
+        1216,
+        352
       ],
       "id": "32543e0d-5823-4889-89e1-0808ec2d5726",
       "name": "Send Email",
-      "webhookId": "your-webhook-id",
+      "webhookId": "a9361068-1a54-4f00-a9c1-18573efd5b9a",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-gmail-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -264,7 +113,7 @@
       "typeVersion": 1,
       "position": [
         -416,
-        -112
+        16
       ],
       "id": "aa242eb4-3241-4ed0-9f9d-be5fb0147f51",
       "name": "Sticky Note"
@@ -283,14 +132,14 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        64,
-        432
+        320,
+        688
       ],
       "id": "9e1121a9-12bb-4cdf-96ba-1eddb0b2c9c6",
       "name": "Update Spreadsheets",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-sheet-credentials-id",
           "name": "Google Drive account"
         }
       }
@@ -310,23 +159,23 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "1BgyTOPRL6dAItCx2_YcfIahyAr48OENz",
+          "value": "your-spreadsheets-folder-id",
           "mode": "list",
           "cachedResultName": "Spreadsheets Folder",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-folder-id-here"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-spreadsheets-folder-id"
         }
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        240,
-        432
+        544,
+        688
       ],
       "id": "c1fe60e6-be22-4ae9-be85-8354998f736f",
       "name": "Move CSV file",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
@@ -336,10 +185,10 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1wY0vifnMMX_ygdkpCUdDBIsiy3dnRch7t0ezcEy5MfY",
+          "value": "your-spreadsheets-folder-id",
           "mode": "list",
           "cachedResultName": "File Organizer Logs",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-id-here/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheets-folder-id/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
@@ -401,27 +250,27 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        624,
-        192
+        992,
+        352
       ],
       "id": "fec18930-45b0-431d-b6e2-0b9c8a1f68af",
       "name": "Log File Action",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-gmail-credentials-id",
           "name": "Google Sheets account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// 1. Fetch the original file details from the Google Drive Trigger\nconst triggerData = $( 'Google Drive Trigger' ).item.json;\nconst fileName = triggerData.name || 'Unknown File';\nconst fileExt = triggerData.fileExtension || 'none';\n\n// 2. Generate a clean timestamp forced to IST (India Standard Time)\nconst now = new Date();\nconst timestamp = new Intl.DateTimeFormat('sv-SE', {\n  timeZone: 'Asia/Kolkata',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit'\n}).format(now);\n\n// 3. Determine which branch executed by trying to read from parent nodes\nlet actionTaken = 'Skipped - Unsupported File Type';\n\ntry {\n  // Check if the PNG branch executed and has data\n  if ($('Move PNG File').item) {\n    actionTaken = 'Moved to Images Folder';\n  }\n} catch (e) {}\n\ntry {\n  // Check if the PDF branch executed and has data\n  if ($('Move PDF File').item) {\n    actionTaken = 'Moved to PDFs Folder';\n  }\n} catch (e) {}\n\ntry {\n  // Check if the Document branch executed and has data\n  if ($('Move Document File').item) {\n    actionTaken = 'Moved to Documents Folder';\n  }\n} catch (e) {}\n\ntry {\n  // Check if the CSV branch executed and has data\n  if ($('Move CSV file').item) {\n    actionTaken = 'Moved to Spreadsheets Folder';\n  }\n} catch (e) {}\n\n\n// 4. Return a clean, standardized object for Google Sheets\nreturn [{\n  json: {\n    Timestamp: timestamp,\n    FileName: fileName,\n    FileExtension: fileExt,\n    Status: actionTaken\n  }\n}];"
+        "jsCode": "// 1. Fetch metadata directly from the Classify File node\n// (Bypasses Google Drive Move nodes which strip custom n8n properties)\nlet originalData = {};\ntry {\n  originalData = $('Classify File').item.json;\n} catch (e) {\n  try {\n    originalData = $('Classify File').first().json;\n  } catch (err) {\n    originalData = $input.item.json;\n  }\n}\n\nconst fileName = originalData.name || $input.item.json.name || 'Unknown File';\nconst category = originalData.cleanCategory || '';\nconst mime = originalData.shortcutDetails?.targetMimeType || originalData.mimeType || $input.item.json.mimeType || '';\n\n// 2. Determine Action Taken based on which execution branch ran\nlet actionTaken = 'Skipped - Unsupported File Type';\n\ntry { if ($('Move PNG File').item) actionTaken = 'Moved to Images Folder'; } catch (e) {}\ntry { if ($('Move PDF File').item) actionTaken = 'Moved to PDFs Folder'; } catch (e) {}\ntry { if ($('Move Document File').item) actionTaken = 'Moved to Documents Folder'; } catch (e) {}\ntry { if ($('Move CSV file').item) actionTaken = 'Moved to Spreadsheets Folder'; } catch (e) {}\n\n// Fallback if branch execution check is bypassed\nif (actionTaken === 'Skipped - Unsupported File Type' && category && category !== 'unsupported') {\n  const statusMap = {\n    image: 'Moved to Images Folder',\n    pdf: 'Moved to PDFs Folder',\n    document: 'Moved to Documents Folder',\n    spreadsheet: 'Moved to Spreadsheets Folder'\n  };\n  if (statusMap[category]) actionTaken = statusMap[category];\n}\n\n// 3. Resolve File Extension safely\nlet fileExt = originalData.cleanExtension;\n\n// Fallback resolution if cleanExtension is missing or 'none'\nif (!fileExt || fileExt === 'none') {\n  if (fileName.includes('.')) {\n    fileExt = fileName.split('.').pop().toLowerCase();\n  } else if (category === 'spreadsheet' || mime.includes('spreadsheet')) {\n    fileExt = 'gsheet';\n  } else if (category === 'document' || mime.includes('document')) {\n    fileExt = 'gdoc';\n  } else if (category === 'image' || mime.includes('image')) {\n    fileExt = 'png';\n  } else if (category === 'pdf' || mime.includes('pdf')) {\n    fileExt = 'pdf';\n  } else if (actionTaken.includes('Spreadsheets')) {\n    fileExt = 'gsheet';\n  } else if (actionTaken.includes('Images')) {\n    fileExt = 'png';\n  } else if (actionTaken.includes('PDFs')) {\n    fileExt = 'pdf';\n  } else if (actionTaken.includes('Documents')) {\n    fileExt = 'gdoc';\n  } else {\n    fileExt = 'none';\n  }\n}\n\n// 4. Generate clean IST Timestamp (YYYY-MM-DD HH:mm:ss)\nconst now = new Date();\nconst timestamp = new Intl.DateTimeFormat('sv-SE', {\n  timeZone: 'Asia/Kolkata',\n  year: 'numeric',\n  month: '2-digit',\n  day: '2-digit',\n  hour: '2-digit',\n  minute: '2-digit',\n  second: '2-digit'\n}).format(now);\n\n// 5. Output formatted log object\nreturn [{\n  json: {\n    Timestamp: timestamp,\n    FileName: fileName,\n    FileExtension: fileExt,\n    Status: actionTaken\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        192
+        768,
+        352
       ],
       "id": "06e5ab39-ea86-43d6-9ebb-046828d1b8aa",
       "name": "Prepare Log Entry"
@@ -431,8 +280,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        960,
-        192
+        1440,
+        352
       ],
       "id": "738b23f0-52a0-4d1b-8f26-88585f197a36",
       "name": "END"
@@ -454,23 +303,23 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "1c-SVg6_RTdM26xb-1rLxFvA5ex4MTVxj",
+          "value": "your-image-folder-id",
           "mode": "list",
           "cachedResultName": "Images folder",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-drive-folder-id-here"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-image-folder-id"
         }
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        240,
-        -48
+        544,
+        16
       ],
       "id": "ea3b75e5-dc39-429f-92f2-54cd8fdf55c0",
       "name": "Move PNG File",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
@@ -492,23 +341,23 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "1pAfiOxy_j5F_h5UNreIKRJVaQq2QWgia",
+          "value": "your-pdf-folder-id",
           "mode": "list",
           "cachedResultName": "PDFs folder",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-folder-id-here"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-pdf-folder-id"
         }
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        240,
-        112
+        544,
+        208
       ],
       "id": "301659be-89b9-460d-be04-2ec72631146b",
       "name": "Move PDF File",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
@@ -530,41 +379,210 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "1FawtIdkKx4s3snooPKAvJancbLfZ5IiX",
+          "value": "your-documents-folder-id",
           "mode": "list",
           "cachedResultName": "Documents folder",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-folder-id-here"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-documents-folder-id"
         }
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        240,
-        272
+        544,
+        496
       ],
       "id": "8b2e6a29-e8ee-4b6c-9765-64305c57632b",
       "name": "Move Document File",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-oauth2-credential-id",
+          "id": "your-google-drive-credentials-id",
           "name": "Google Drive account"
         }
       }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        352
+      ],
+      "id": "ae298e96-6221-4427-9c27-87164a0a8431",
+      "name": "Poll Uploads Folder"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "='your-uploads-folder-id' in parents and trashed = false",
+        "returnAll": true,
+        "filter": {},
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        352
+      ],
+      "id": "7b058ad0-51ad-4a79-b8ba-13257dc6c7b4",
+      "name": "Fetch Files from Uploads",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "your-google-drive-credentials-id",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const file = $input.item.json;\nconst fileName = file.name || 'Unknown File';\n\n// 1. Resolve effective MIME type (checks shortcut target first)\nconst mimeType = file.shortcutDetails?.targetMimeType || file.mimeType || '';\n\n// 2. Extract file extension from name if present\nlet ext = file.fileExtension;\nif (!ext && fileName.includes('.')) {\n  ext = fileName.split('.').pop().toLowerCase();\n}\n\n// 3. Fallback: Infer extension from MIME type for native Google files or shortcuts\nif (!ext) {\n  if (mimeType.includes('spreadsheet')) ext = 'gsheet';\n  else if (mimeType.includes('document')) ext = 'gdoc';\n  else if (mimeType.includes('presentation')) ext = 'gslides';\n  else if (mimeType.includes('pdf')) ext = 'pdf';\n  else if (mimeType.includes('image')) ext = 'png';\n}\n\n// 4. Categorize file based on extension and MIME type\nlet category = 'unsupported';\n\nif (/^(png|jpe?g|webp|gif|svg)$/i.test(ext) || mimeType.includes('image')) {\n  category = 'image';\n} else if (ext === 'pdf' || mimeType.includes('pdf')) {\n  category = 'pdf';\n} else if (/^(docx?|txt|rtf|gdoc)$/i.test(ext) || mimeType.includes('document')) {\n  category = 'document';\n} else if (/^(csv|xlsx?|ods|gsheet)$/i.test(ext) || mimeType.includes('spreadsheet')) {\n  category = 'spreadsheet';\n}\n\n// 5. Output unified properties\nreturn [{\n  json: {\n    ...file,\n    cleanCategory: category,\n    cleanExtension: ext || 'none'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        352
+      ],
+      "id": "18ecfc5a-263c-438b-beea-636f4de65bc7",
+      "name": "Classify File"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "683e8d61-5534-4ced-a868-f69edcd07339",
+                    "leftValue": "={{ $json.cleanCategory }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Images folder"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2fe2ed35-c7f7-4626-88b8-a9edccaaaf17",
+                    "leftValue": "={{ $json.cleanCategory }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDFs folder"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "be592907-3481-4ea1-9d2b-614435bc9c84",
+                    "leftValue": "={{ $json.cleanCategory }}",
+                    "rightValue": "document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Documents folder"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "54723e31-1160-4de4-a1f4-82cc38fe8939",
+                    "leftValue": "={{ $json.cleanCategory }}",
+                    "rightValue": "spreadsheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Spreadsheets folder"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Unsupported Files"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        304
+      ],
+      "id": "1d7de7a1-5016-4702-a494-6b389082b236",
+      "name": "Route by Category"
     }
   ],
   "pinData": {},
   "connections": {
-    "Google Drive Trigger": {
-      "main": [
-        [
-          {
-            "node": "Check File Type",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Update PDFs": {
       "main": [
         [
@@ -592,45 +610,6 @@
         [
           {
             "node": "Move PNG File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check File Type": {
-      "main": [
-        [
-          {
-            "node": "Update Images",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Update PDFs",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Update Documents",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Update Spreadsheets",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Prepare Log Entry",
             "type": "main",
             "index": 0
           }
@@ -724,6 +703,78 @@
           }
         ]
       ]
+    },
+    "Poll Uploads Folder": {
+      "main": [
+        [
+          {
+            "node": "Fetch Files from Uploads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Files from Uploads": {
+      "main": [
+        [
+          {
+            "node": "Classify File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify File": {
+      "main": [
+        [
+          {
+            "node": "Route by Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Category": {
+      "main": [
+        [
+          {
+            "node": "Update Images",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update PDFs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Documents",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Spreadsheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Log Entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -732,12 +783,8 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "a8cc4068-3ae4-4061-9021-45e19e7489bb",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
-  },
+  "versionId": "",
+  "meta": {},
   "nodeGroups": [],
-  "id": "PmNbxGQgHIFbxJh5",
   "tags": []
 }
