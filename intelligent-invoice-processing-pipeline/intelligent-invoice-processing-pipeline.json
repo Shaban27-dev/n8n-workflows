@@ -6,8 +6,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1904,
-        112
+        2128,
+        -112
       ],
       "id": "47a477a0-8e55-490d-ad7f-5ea33f39a08c",
       "name": "END"
@@ -25,14 +25,14 @@
       "typeVersion": 2.2,
       "position": [
         208,
-        112
+        -112
       ],
       "id": "ee3520b0-0752-441d-827c-45781050c644",
       "name": "Download Email Attachments",
-      "webhookId": "your-webhook-id",
+      "webhookId": "gmail-webhook-id",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-oauth2-credentials-id",
+          "id": "gmail-OAuth2-credentials",
           "name": "Gmail account"
         }
       }
@@ -51,13 +51,13 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1680,
-        16
+        1904,
+        -208
       ],
-      "webhookId": "your-webhook-id",
+      "webhookId": "gmail-webhook-id",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-oauth2-credentials-id",
+          "id": "gmail-OAuth2-credentials",
           "name": "Gmail account"
         }
       }
@@ -74,15 +74,15 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1680,
-        208
+        1904,
+        -16
       ],
       "id": "819cc387-d30c-40c2-b6cf-0b42366be099",
       "name": "Alert Manual Review Required",
-      "webhookId": "your-webhook-id",
+      "webhookId": "gmail-webhook-id",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-oauth2-credentials-id",
+          "id": "gmail-OAuth2-credentials",
           "name": "Gmail account"
         }
       }
@@ -99,7 +99,7 @@
           "conditions": [
             {
               "id": "17c9ca9d-cc4c-44da-81d6-539839bf166a",
-              "leftValue": "={{ $json.output['Invoice Number'] }}",
+              "leftValue": "={{ $json.output?.['Invoice Number'] || 'Not Found' }}",
               "rightValue": "Not Found",
               "operator": {
                 "type": "string",
@@ -108,8 +108,8 @@
             },
             {
               "id": "cb1641d0-9237-4c5e-b08c-7e3747be2fcb",
-              "leftValue": "={{ Number($json.output['Total Amount'].replace(/[$,]/g, '')) }}",
-              "rightValue": "={{ 0 }}",
+              "leftValue": "={{ Number(($json.output?.['Total Amount'] || '0').replace(/[^0-9.]/g, '')) }}",
+              "rightValue": 0,
               "operator": {
                 "type": "number",
                 "operation": "gt"
@@ -117,7 +117,7 @@
             },
             {
               "id": "5feffe2d-844b-4463-8076-e573c886bc50",
-              "leftValue": "={{ DateTime.fromISO($json.output['Due Date']).isValid }}",
+              "leftValue": "={{ DateTime.fromISO($json.output?.['Due Date'] || '').isValid }}",
               "rightValue": "Not Found",
               "operator": {
                 "type": "boolean",
@@ -128,7 +128,7 @@
             {
               "id": "f8cf6a78-75bd-4202-85aa-ed15feb1388d",
               "leftValue": "={{ $('OCR Invoice PDF').item.json.results[0].entities[0].objects[0].entities[0].text.length }}",
-              "rightValue": "={{ 100 }}",
+              "rightValue": 100,
               "operator": {
                 "type": "number",
                 "operation": "gt"
@@ -142,8 +142,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1232,
-        112
+        1456,
+        -112
       ],
       "id": "03eb4d66-0651-4451-9440-a612ec54b4ac",
       "name": "Validate Invoice"
@@ -153,17 +153,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "169dCEyhdJQUxPvUZwEpBrbK0jikQSQZ-gPvBYzwbeaM",
+          "value": "your-spreadsheet-folder-id",
           "mode": "list",
           "cachedResultName": "Invoice Processing Dashboard",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-id/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "✅ Processed Invoices",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-id/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -283,34 +283,13 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        1456,
-        16
+        1680,
+        -208
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-oauth2-credentials-id",
+          "id": "google-sheet-OAuth2-credentials",
           "name": "Google Sheets account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "options": {
-          "maxTokens": 2000
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
-      "position": [
-        736,
-        496
-      ],
-      "id": "3b624356-00ad-48e6-a04c-9b9961ea0335",
-      "name": "AI Chat Model",
-      "credentials": {
-        "openRouterApi": {
-          "id": "your-openrouter-api-credentials-id",
-          "name": "OpenRouter account"
         }
       }
     },
@@ -329,14 +308,14 @@
       "typeVersion": 1.4,
       "position": [
         -16,
-        112
+        -112
       ],
       "id": "00f6a138-c5f7-417e-940c-ff3bb28c6c24",
       "name": "Monitor Invoice Emails",
       "alwaysOutputData": false,
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-oauth2-credentials-id",
+          "id": "gmail-OAuth2-credentials",
           "name": "Gmail account"
         }
       }
@@ -352,10 +331,10 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "118oh_Ur4XRDxVVbtunhJ0AkAX16kR7oU",
+          "value": "your-spreadsheet-folder-id",
           "mode": "list",
           "cachedResultName": "Invoices_To_Process",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-folder-id"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-spreadsheet-folder-id"
         },
         "options": {}
       },
@@ -364,12 +343,12 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        720,
-        -32
+        944,
+        -256
       ],
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "your-google-drive-oauth2-credentials-id",
+          "id": "google-drive-OAuth2-credentials",
           "name": "Google Drive account"
         }
       }
@@ -383,8 +362,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1008,
-        112
+        1232,
+        -112
       ],
       "id": "6e73d566-8610-4dfa-82e8-3bb978afd574",
       "name": "Combine OCR & Metadata",
@@ -393,13 +372,22 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://demo.api4ai.cloud/ocr/v1/results",
+        "url": "https://api4ai.cloud/ocr/v1/results",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "your-api4ai-API-Key"
+            }
+          ]
+        },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "A4A-API-KEY",
-              "value": "your-api4ai-key"
+              "value": "your-api4ai-API-Key"
             }
           ]
         },
@@ -421,8 +409,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        432,
-        272
+        656,
+        48
       ]
     },
     {
@@ -480,8 +468,8 @@
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
       "position": [
-        656,
-        272
+        880,
+        48
       ],
       "id": "618693d1-ca73-4b78-8bc4-95f8e91735d7",
       "name": "AI Invoice Extractor",
@@ -492,17 +480,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "169dCEyhdJQUxPvUZwEpBrbK0jikQSQZ-gPvBYzwbeaM",
+          "value": "your-spreadsheet-folder-id",
           "mode": "list",
           "cachedResultName": "Invoice Processing Dashboard",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1196335297,
           "mode": "list",
           "cachedResultName": "⚠ Invoice Audit Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-google-sheet-id/edit#gid=1196335297"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit#gid=1196335297"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -615,15 +603,71 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1456,
-        208
+        1680,
+        -16
       ],
       "id": "c74eaeed-ba9e-4f79-a3b5-8060897bf4a2",
       "name": "Log Failed Invoice",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-oauth2-credentials-id",
+          "id": "google-sheet-OAuth2-credentials",
           "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4c6b618e-3e69-4411-a4a8-a9df8d0aef6d",
+              "leftValue": "={{ $binary.attachment_0?.fileName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        432,
+        -112
+      ],
+      "id": "f37682c5-3a79-445d-8956-2ea197dbefe4",
+      "name": "Filter PDF Attachments"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {
+          "maxOutputTokens": 1500
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        272
+      ],
+      "id": "a3e2836a-c590-4028-b83e-d72bc20fed2d",
+      "name": "Google Gemini AI",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "your-google-gemini-api-key",
+          "name": "Google Gemini(PaLM) Api account"
         }
       }
     }
@@ -634,12 +678,7 @@
       "main": [
         [
           {
-            "node": "OCR Invoice PDF",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Archive Original Invoice",
+            "node": "Filter PDF Attachments",
             "type": "main",
             "index": 0
           }
@@ -692,17 +731,6 @@
           {
             "node": "Notify Processing Success",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Invoice Extractor",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -773,6 +801,33 @@
           }
         ]
       ]
+    },
+    "Filter PDF Attachments": {
+      "main": [
+        [
+          {
+            "node": "OCR Invoice PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Archive Original Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini AI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Invoice Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -781,12 +836,9 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "cdcccec9-8740-49d0-9d00-b6f83e3e8f5d",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
-  },
+  "versionId": "",
+  "meta": {},
   "nodeGroups": [],
-  "id": "KYKmWIXUIAA3s4Jh",
+  "id": "",
   "tags": []
 }
