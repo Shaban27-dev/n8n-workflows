@@ -957,18 +957,10 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": true,
-    "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner"
+    "availableInMCP": true
   },
-  "versionId": "01860f3e-1c82-491c-bd63-079cee3deed3",
-  "meta": {
-    "aiBuilderAssisted": true,
-    "builderVariant": "mcp",
-    "templateCredsSetupCompleted": true,
-    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
-  },
+  "versionId": "",
+  "meta": {},
   "nodeGroups": [],
-  "id": "BGRCsVKBG0XBRcsd",
   "tags": []
 }
