@@ -1,82 +1,70 @@
 # 🔔 Price Drop Notifier
 
 ![n8n](https://img.shields.io/badge/built%20with-n8n-FF6D5A?style=flat-square&logo=n8n)
-![Status](https://img.shields.io/badge/status-production--ready-brightgreen?style=flat-square)
-![Trigger](https://img.shields.io/badge/trigger-scheduled%20daily-blue?style=flat-square)
+![Status](https://img.shields.io/badge/status-reference%20build-lightgrey?style=flat-square)
+![Trigger](https://img.shields.io/badge/trigger-hours%20interval-blue?style=flat-square)
 ![Notifications](https://img.shields.io/badge/notifications-Gmail-red?style=flat-square&logo=gmail)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square)
 
-A production-ready n8n automation that monitors e-commerce product prices on a daily schedule, scrapes live pricing data, validates the result, and fires a polished HTML email alert the instant a product drops to your target price. Zero manual effort. Zero missed deals.
+An n8n automation that checks an e-commerce product page on a schedule, scrapes the live price and product name from the page HTML, validates the extracted data, and sends a branded HTML email when the price is under a configured threshold. Errors in data extraction are routed to a separate diagnostic email instead of failing silently.
 
 ---
 
 ## Problem
 
-Most people track product prices the same way — by opening the same product page every day, hoping the number changed. It rarely does, and when it finally does, the sale is already gone.
-
-Flash discounts on e-commerce platforms last hours, not days. Prices shift without notice. A product sitting at ₹1,199 one morning can hit ₹799 by afternoon and bounce back by evening. Manual monitoring can't keep up with that, and no one wants to babysit a browser tab.
-
-The real cost isn't missing a deal — it's the accumulated time wasted checking prices that haven't changed.
+Most people track product prices by opening the same page over and over, hoping the number has changed. Flash discounts and short-lived sales often come and go in hours, and manually checking a tab isn't a reliable way to catch them. The time cost isn't missing a single deal — it's the repeated, low-value effort of checking a price that hasn't moved.
 
 ---
 
 ## Solution
 
-This workflow handles price monitoring entirely on autopilot.
-
-Every day, without any human input, it visits the target product page, extracts the current price from the live HTML, runs it through a validation check, compares it against a configured threshold, and — if the price has dropped far enough — sends an immediate, well-formatted email alert with a direct link to the product.
-
-If scraping fails or the price data comes back empty, the workflow catches that too and routes an error notification instead of silently failing.
-
-The result: you hear about price drops the day they happen, not a week later.
+This workflow automates the check. On a timed interval, it fetches the target product page, extracts the price and product name from the raw HTML using CSS selectors, confirms both values were actually found, and compares the parsed price against a fixed threshold configured in the workflow. If the price is below that threshold, it sends a formatted email alert with the product name, current price, and a link back to the product page. If the extraction step comes back empty — for example because the page layout changed — it sends a separate diagnostic email instead of proceeding with bad data.
 
 ---
 
 ## Architecture
 
-The workflow is structured as a linear pipeline with two branching decision points — one for data validation, one for price comparison.
+The workflow runs as a linear pipeline with two branching decision points: one that validates the scraped data, and one that checks the price against the threshold.
 
-**Run Daily Check** — A Schedule Trigger that fires the workflow automatically once per day. No cron expressions to manage; the timing is configured directly in n8n's UI and runs unattended in the background.
+**Run Daily Check** is a Schedule Trigger. In the current export its interval is configured on the `hours` field rather than a `days` field, and no explicit numeric interval is set in the JSON itself — the exact run frequency is whatever is configured in the trigger's UI settings, and is not determinable from the export alone. The node's display name suggests a daily cadence, but that is a naming choice rather than a technical guarantee; treat the two as independent until the interval is explicitly set.
 
-**Fetch Product Page** — An HTTP Request node that performs a GET request against the target product URL and returns the full HTML body. This is the raw data source for everything downstream.
+**Fetch Product Page** is an HTTP Request node that issues a GET request against the configured product URL and returns the page's raw HTML. The URL currently saved in the workflow (`https://share.google/MyProductPage`) is a placeholder and needs to be replaced with a real product page before this workflow would do anything useful.
 
-**Extract Price** — An HTML Extraction node that parses the page HTML and pulls the current price using a CSS selector. This step isolates the single data point the workflow needs, discarding everything else.
+**Extract Price** is an HTML Extraction node that pulls two fields from the returned HTML using CSS selectors: `Product_Price` from `.mQzvxd b`, and `Product_Name` from `div[data-attrid="product_title"]`. The node is configured with `onError: continueRegularOutput`, so if the extraction itself throws (for example, because the selector no longer matches anything on the page), execution continues rather than halting — the resulting empty values are what the next node checks for.
 
-**Verify Data Exists** — The first IF node. Before doing anything else with the price, the workflow checks that the extraction actually returned a value. This guards against scraping failures, layout changes, or network hiccups that could produce empty or null data. Two paths branch from here:
+**Verify Data Exists** is an IF node that confirms both `Product_Price` and `Product_Name` are non-empty strings. If either is empty, the false branch fires. If both are present, the true branch continues.
 
-- **False** → `Send Error Alert`: A Gmail node dispatches a diagnostic email alerting you that the scrape returned no data. The workflow stops here.
-- **True** → continues downstream.
+- **False** → `Send Error Alert`: a Gmail node sends a static diagnostic email explaining that the page structure may have changed or the selectors need review. Nothing is connected downstream of this node — the run ends here.
+- **True** → continues to `Fetch product Details`.
 
-**Fetch Product Details** — Retrieves supplementary product metadata (name, URL) to populate the notification email. Keeping this step separate from the price extraction keeps the pipeline modular and easy to reconfigure.
+**Fetch product Details** is not an HTTP or scraping node despite its name — it's a JavaScript Code node. It parses the first numeric run out of the raw `Product_Price` string with a regular expression, strips comma separators, and converts the result to a number as `currentPrice`. It also reads the workflow's static data store via `$getWorkflowStaticData('global')`, pulling out a previously saved price into a local `oldPrice` variable, and then immediately overwrites that stored value with the current run's price. `oldPrice` is read and reassigned but not referenced anywhere else in the code or passed downstream — as written, it currently has no effect on the workflow's behavior. The node outputs `productUrl` (read from the static URL parameter configured on the `Fetch Product Page` node, not the page's actual response URL), `productName`, and `currentPrice`.
 
-**Price Below Threshold?** — The second IF node compares the extracted price against a numeric threshold defined in the workflow configuration. Two paths branch from here:
+**Price Below Threshold?** is an IF node that compares `currentPrice` against a hardcoded numeric literal, `850`, using a less-than operator. This is a fixed threshold check against a single configured number — it is not a comparison against the previously saved price, even though a previous price is being stored in static data (see above).
 
-- **False** → `END`: The price hasn't dropped low enough. The workflow terminates quietly — no email, no noise.
-- **True** → `Send Price Drop Alert Email`
+- **True** (`currentPrice < 850`) → `Send Price Drop Alert Email`.
+- **False** → nothing is connected; the run ends here with no output.
 
-**Send Price Drop Alert Email** — A Gmail node that renders and sends a branded HTML email containing the product name, current price, a visual price display, and a direct call-to-action button. This is the only notification the user receives under normal operation.
+**Send Price Drop Alert Email** is a Gmail node that renders a branded HTML email containing the product name, current price, a "PRICE DROP TRACKED" badge, a "Your target threshold has been met!" heading, the price displayed in a styled card, and a "View Product on Store" button linking to `productUrl`. The recipient address and Gmail credential in the export are both placeholder values.
 
-**END** — Execution terminates cleanly after either a successful alert or a quiet no-action exit.
+**END** is a No-Op node used purely as a visual terminator for the alert branch. The error branch and the below-threshold-not-met branch both end without reaching it.
 
 ---
 
 ## 📊 Workflow Diagram
-
-The pipeline's structural topology and conditional execution paths are mapped below:
 
 ```mermaid
 flowchart LR
     A[Run Daily Check] --> B[Fetch Product Page]
     B --> C[Extract Price]
     C --> D{Verify Data Exists}
-    
-    D -- No --> E[Send Error Alert]
-    D -- Yes --> F[Fetch Product Details]
-    
-    F --> G{"Price Below Threshold?"}
-    G -- Yes --> H[Send Price Drop Alert Email]
-    H --> I[End]
-    G -- No --> I
+
+    D -- False --> E[Send Error Alert]
+    D -- True --> F[Fetch product Details]
+
+    F --> G{Price Below Threshold?}
+    G -- True: less than 850 --> H[Send Price Drop Alert Email]
+    H --> I[END]
+    G -- False --> J[No connection — run ends]
 ```
 
 ---
@@ -85,29 +73,29 @@ flowchart LR
 
 | Technology | Role |
 |---|---|
-| **n8n** | Workflow orchestration engine — hosts, schedules, and executes the entire pipeline |
-| **Schedule Trigger** | Time-based trigger that fires the workflow once per day without external cron |
-| **HTTP Request** | Fetches the raw HTML of the target product page via GET request |
-| **HTML Extraction** | Parses the page HTML and extracts the price field using a CSS selector |
-| **IF Node (×2)** | Implements branching logic — data validation gate and price threshold gate |
-| **Gmail** | Delivers both price drop alerts and error notifications via authenticated SMTP |
-| **HTML Email Template** | Custom-designed email body with branded layout, price display, and CTA button |
+| **n8n** | Workflow orchestration engine — hosts, schedules, and executes the pipeline |
+| **Schedule Trigger** | Interval-based trigger, currently configured on an `hours` field |
+| **HTTP Request** | Fetches the raw HTML of the target product page via GET |
+| **HTML Extraction** | Parses the page HTML and pulls price and name via CSS selectors |
+| **IF Node (×2)** | Branching logic — data validation gate, then threshold gate |
+| **Code Node (JavaScript)** | Parses the price string to a number, reads/writes workflow static data, shapes the output object |
+| **Gmail (×2)** | Sends the price-drop alert email and the error diagnostic email |
+| **No-Op** | Terminator node for the alert branch |
 
 ---
 
 ## Features
 
-- **Automated daily execution** — runs on a schedule with no manual trigger required
-- **Live web scraping** — fetches and parses real-time product page HTML on every run
-- **Data validation gate** — catches empty or null scraping results before they reach downstream logic
-- **Threshold-based alerting** — only sends a notification when the price actually meets the target
-- **Dual-path error handling** — routes scraping failures to a dedicated error email rather than silent failure
-- **Branded HTML email notifications** — polished, responsive email layout with price display and direct product link
-- **Fully unattended operation** — no dashboards, logins, or manual checks required
-- **Modular node structure** — each step is isolated and independently configurable
-- **Easily reconfigurable threshold** — changing the target price requires editing a single IF node condition
-- **Lightweight execution** — no external databases, no browser automation, minimal resource footprint
-- **Extendable architecture** — additional products, channels, or storage layers can be added without restructuring the core pipeline
+| Feature | Description |
+|---|---|
+| Interval-based execution | Runs on a schedule without a manual trigger, per the Schedule Trigger's configured interval |
+| Live HTML scraping | Fetches and parses the current page HTML on every run |
+| Data validation gate | Checks that both extracted fields are non-empty before continuing |
+| Threshold-based alerting | Sends an email only when the parsed price is below a configured numeric threshold |
+| Separate error path | Routes missing/empty extraction results to a distinct diagnostic email rather than proceeding silently |
+| Branded HTML email | Formatted alert with a price card and a direct call-to-action button |
+| Workflow-scoped price memory | Stores the last seen price in workflow static data (not currently used in the alert decision) |
+| Modular nodes | Each step is a separate, independently configurable node |
 
 ---
 
@@ -115,104 +103,98 @@ flowchart LR
 
 ### Workflow
 
-> **`images/workflow.png`**
->
-> ![n8n Workflow](images/workflow.png)
+![n8n Workflow](images/workflow.png)
 
-The complete 8-node pipeline as it appears in the n8n editor. The two branching IF nodes are visible — one handling data validation, one handling price comparison.
-
----
+The 9-node pipeline as it appears in the n8n editor: trigger, fetch, extract, validate, the JavaScript price-parsing node, the threshold check, and the two Gmail branches.
 
 ### Email Notification
 
-> **`images/email-alert.png`**
->
-> ![Email Alert](images/email-alert.png)
+![Email Alert](images/email-alert.png)
 
-A live example of the price drop alert delivered to Gmail. The notification includes a "PRICE DROP TRACKED" status badge, the product name, current selling price displayed prominently in a green price card, and a blue CTA button linking directly to the product page.
+The price-drop alert as delivered to Gmail, showing the "PRICE DROP TRACKED" badge, the product name, the current price (₹799 in this captured example), and the "View Product on Store" button.
 
 ---
 
 ## How It Works
 
-1. **The Schedule Trigger fires.** Once per day, n8n wakes the workflow and begins execution. No input is required.
-
-2. **The product page is fetched.** An HTTP GET request is sent to the target URL. The full HTML response body is passed to the next node.
-
-3. **The price is extracted.** An HTML Extraction node applies a CSS selector to locate the price element in the raw HTML and outputs its text value as a clean field.
-
-4. **Data validation is checked.** An IF node evaluates whether the extracted price field is non-empty. If extraction failed or returned nothing, the false path activates.
-
-5. **Error alert dispatched (if applicable).** If validation fails, a Gmail node sends a diagnostic email and execution stops. This prevents bad data from reaching the price comparison logic.
-
-6. **Product details are retrieved.** With a valid price confirmed, the workflow fetches supplementary metadata — product name and URL — to populate the email template.
-
-7. **Price is compared to threshold.** An IF node compares the current price (as a number) to the configured target price. If the price is still above the threshold, execution ends quietly — no notification sent.
-
-8. **Price drop alert is sent.** If the price has met the threshold, a Gmail node renders the branded HTML email and delivers it. The email includes the product name, the current selling price in a styled price card, and a "View Product on Store" button.
-
-9. **Execution ends.** The workflow terminates cleanly. On the next scheduled run, the cycle repeats from step one.
+1. **The Schedule Trigger fires** on its configured interval (currently set on the `hours` field; the specific numeric interval isn't present in the exported JSON).
+2. **The product page is fetched** with an HTTP GET request to the configured URL.
+3. **The price and name are extracted** from the returned HTML using the two CSS selectors. If extraction errors out, the node continues with empty output rather than halting.
+4. **Data validation runs.** If `Product_Price` or `Product_Name` came back empty, execution routes to the error path.
+5. **On invalid data**, `Send Error Alert` sends a diagnostic email and the run ends.
+6. **On valid data**, the Code node parses the price string into a number, reads and overwrites the stored previous price in workflow static data, and outputs `productUrl`, `productName`, and `currentPrice`.
+7. **The price is compared to the threshold.** If `currentPrice` is less than 850, execution continues to the alert email; otherwise the run ends with no output.
+8. **The alert email is sent**, rendering the branded HTML template with the current price and a link to the product page.
+9. **Execution ends** at the No-Op node on the alert path, or ends without a terminator node on the other two paths.
 
 ---
 
 ## Sample Configuration
 
 ```yaml
-Target Product:  Wellcore Pure Micronised Creatine Monohydrate
-Target Price:    ₹799
-Alert Channel:   Gmail
-Schedule:        Once daily (configurable — hourly runs also supported)
-Product URL:     https://example-store.com/product/creatine-monohydrate
-Price Selector:  .product-price span  (configurable per site)
+Product URL:       https://share.google/MnHzzv8cCfWiE7VmR  
+Price Selector:     .mQzvxd b
+Name Selector:       div[data-attrid="product_title"]
+Configured Threshold: 850                                # currentPrice < 850 triggers the alert
+Trigger Interval:    hours field (exact count set in n8n UI, not present in this export)
+Alert Channel:       Gmail (recipient in export: youremail@gmail.com — placeholder)
 ```
 
 ---
 
 ## Sample Output
 
-When the price threshold is met, the following email is delivered:
+The captured example below reflects an actual run where the parsed price came in under the configured ₹850 threshold. The ₹799 figure is the example current price, not the threshold — the threshold itself is a separate, fixed value of ₹850 set in the `Price Below Threshold?` node.
 
 ```
 Subject: 🚨 Price Drop Alert: Wellcore Pure Micronised Creatine Monohydrate is now ₹799!
 
 ┌──────────────────────────────────────────────────┐
-│  PRICE DROP TRACKED                              │
-│                                                  │
-│  Your target threshold has been met!             │
-│                                                  │
-│  Good news! The price for Wellcore Pure          │
-│  Micronised Creatine Monohydrate has dipped      │
-│  below your configured target threshold limits.  │
-│                                                  │
-│  ┌────────────────────────────────────────────┐  │
-│  │        CURRENT SELLING PRICE               │  │
-│  │                  ₹799                      │  │
-│  └────────────────────────────────────────────┘  │
-│                                                  │
-│  [ View Product on Store → ]                     │
+│  PRICE DROP TRACKED                               │
+│                                                    │
+│  Your target threshold has been met!              │
+│                                                    │
+│  Good news! The price for Wellcore Pure           │
+│  Micronised Creatine Monohydrate has dipped        │
+│  below your configured target threshold limits.    │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │        CURRENT SELLING PRICE                 │ │
+│  │                  ₹799                        │ │
+│  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  [ View Product on Store → ]                       │
 └──────────────────────────────────────────────────┘
 
-Timestamp:      2026-06-25 19:58 IST
-Target Price:   ₹799
-Current Price:  ₹799
+Configured Threshold:  ₹850
+Current Price:         ₹799
 ```
+
+---
+
+## Known Behavior & Current Limitations
+
+- **Trigger cadence isn't fully specified.** The Schedule Trigger's interval field is set to `hours`, but no numeric interval value is present in the exported JSON, so the effective run frequency depends entirely on the live n8n instance's trigger configuration.
+- **Placeholder values throughout.** The product URL, the alert/error email recipient, and the Gmail credential ID are all placeholders in this export and need to be set before the workflow is usable.
+- **Threshold is a single hardcoded number.** `850` is written directly into the IF node's condition rather than exposed as a workflow variable or parameter.
+- **Stored price isn't used yet.** The Code node saves the current price to workflow static data (`savedPrice`) and reads the previous value into `oldPrice` on each run, but `oldPrice` is never referenced again — the alert logic is a static threshold check, not a drop-versus-last-run comparison, even though the underlying state needed for that comparison is already being captured.
+- **Error handling scope.** The error branch only covers the case where the extracted price or name comes back empty. Broader HTTP-level failures (timeouts, non-200 responses) aren't separately branched on elsewhere in this JSON.
+- **Exported as inactive.** The workflow JSON has `"active": false`.
 
 ---
 
 ## Future Improvements
 
-The current architecture is intentionally minimal — a single product, a single channel, no persistence. That makes it easy to audit, debug, and extend. Planned enhancements include:
-
-- **Multi-product tracking** — parameterize the workflow to monitor multiple products from a single run
-- **Google Sheets price history** — log every daily price check to a spreadsheet for trend analysis
-- **Telegram & Slack notifications** — add parallel notification channels alongside email
-- **WhatsApp alerts** — integrate with WhatsApp Business API or Twilio for mobile push
-- **Price history charts** — visualize price trends over time using Sheets or a charting API
-- **AI-based buying recommendations** — use an LLM node to analyze price history and suggest optimal buy timing
-- **Playwright-based scraping** — replace HTTP + HTML Extraction with a headless browser node for JavaScript-rendered pages
-- **Database storage** — persist price history in PostgreSQL or Airtable for richer querying
-- **Price drop percentage alerts** — trigger on percentage drops rather than fixed thresholds
-- **Docker deployment** — self-hosted n8n instance containerized for consistent production environments
+- **Use the stored previous price** already captured in static data to detect an actual price *drop*, rather than a fixed absolute threshold
+- **Multi-product tracking** — parameterize the workflow to monitor more than one product per run
+- **Google Sheets price history** — log each check for trend analysis
+- **Additional notification channels** — Telegram, Slack, or WhatsApp alongside email
+- **Price history charts** — visualize trends over time
+- **Percentage-based alerts** — trigger on a relative drop rather than an absolute number
+- **Playwright-based scraping** — handle JavaScript-rendered product pages
+- **Database storage** — persist price history in PostgreSQL or Airtable
+- **Explicit numeric interval** — set and document a concrete schedule instead of relying on UI-only configuration
+- **Broader HTTP error handling** — branch on request failures, not just empty extraction results
 
 ---
 
@@ -220,15 +202,14 @@ The current architecture is intentionally minimal — a single product, a single
 
 ```
 price-drop-notifier/
-├── price-drop-notifier.json           # Exported n8n workflow (importable directly)
+├── price-drop-notifier.json    # Exported n8n workflow (importable directly)
 ├── README.md
-├── screenshots/
-│   ├── workflow.png        # n8n editor screenshot
-│   ├── email-alert.png     # Gmail notification screenshot
-|   └── LECENSE
+└── images/
+    ├── workflow.png            # n8n editor screenshot
+    └── email-alert.png         # Gmail notification screenshot
 ```
 
-To use this workflow: import `workflow.json` into your n8n instance, connect your Gmail credentials, update the target URL and price threshold in the IF node, and activate.
+To use this workflow: import the workflow JSON into your n8n instance, connect Gmail credentials, replace the placeholder product URL and recipient address, review the CSS selectors against your target site, and set the threshold and trigger interval before activating.
 
 ---
 
@@ -237,7 +218,7 @@ To use this workflow: import `workflow.json` into your n8n instance, connect you
 **Shaban Alam**
 Python Automation Developer · n8n Workflow Specialist · AI Integration Engineer
 
-Building production-ready automation systems for businesses that want to eliminate repetitive manual work.
+Building automation systems for businesses that want to eliminate repetitive manual work.
 
 - **GitHub:** [github.com/Shaban27-dev](https://github.com/Shaban27-dev)
 - **Email:** shabandev27@gmail.com
@@ -249,8 +230,6 @@ Building production-ready automation systems for businesses that want to elimina
 
 ## Summary
 
-Price Drop Notifier demonstrates a complete, production-grade automation pipeline — scheduled execution, live HTTP scraping, HTML parsing, multi-branch conditional logic, error handling, and automated email delivery, all orchestrated through n8n without writing a single line of application code.
+Price Drop Notifier is a compact n8n pipeline covering scheduled execution, live HTTP scraping, HTML parsing, data validation, JavaScript-based price parsing with workflow-scoped state, multi-branch conditional logic, and email delivery through two Gmail nodes. It's structured as a reference build: the logic is complete and internally consistent, but several values — the product URL, recipient address, credential ID, and trigger interval — are placeholders that need to be filled in before deployment, and one piece of captured state (the previous price) isn't yet wired into the alert decision.
 
-It is the kind of workflow a business would actually deploy: reliable, fault-tolerant, quietly running in the background, and actionable when it matters. The architecture is deliberately modular, meaning any component — the data source, the notification channel, the threshold logic — can be replaced or extended without touching the rest of the pipeline.
-
-This project is part of an active automation portfolio. Additional workflows covering lead enrichment, invoice processing, job alert systems, and multi-channel notification pipelines are available in the linked GitHub profile.
+This project is part of an active automation portfolio. Additional workflows covering lead enrichment, invoice processing, and related pipelines are available in the linked GitHub profile.
