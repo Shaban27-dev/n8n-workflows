@@ -314,12 +314,9 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "020be633-1b92-4811-bfc1-6ab653df8b3f",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
-  },
+  "versionId": "",
+  "meta": {},
   "nodeGroups": [],
-  "id": "tC6FDHJi4toQJp0i",
+  "id": "",
   "tags": []
 }
