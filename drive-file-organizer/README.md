@@ -1,83 +1,98 @@
 # ⚙️ Drive File Organizer
 
 ![n8n](https://img.shields.io/badge/built%20with-n8n-FF6D5A?style=flat-square&logo=n8n)
-![Status](https://img.shields.io/badge/status-production--ready-brightgreen?style=flat-square)
-![Trigger](https://img.shields.io/badge/trigger-event--driven-blue?style=flat-square)
+![Status](https://img.shields.io/badge/status-reference%20build-lightgrey?style=flat-square)
+![Trigger](https://img.shields.io/badge/trigger-10s%20polling-blue?style=flat-square)
 ![Integrations](https://img.shields.io/badge/integrations-Drive%20%7C%20Sheets%20%7C%20Gmail-4285F4?style=flat-square&logo=google)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square)
 
-A production-ready n8n automation that turns Google Drive into a self-organizing file system. The moment a file lands in a monitored root folder, this workflow detects it, reads its extension, routes it into the correct destination folder, appends a structured log entry to Google Sheets, and fires a confirmation email — all within seconds, with no human involvement.
+An n8n automation that keeps a monitored Google Drive folder organized. A Schedule Trigger polls the folder every 10 seconds; a JavaScript classifier reads each file's extension and MIME type; a Switch node routes it into one of four supported categories; matching files are renamed and moved into their destination folder; and every outcome — including unsupported files — is written to a Google Sheets audit log and confirmed by email.
 
 ---
 
 ## Problem
 
-Shared Google Drive folders accumulate clutter fast. Without enforced structure, every team member uploads files wherever is convenient, and within weeks a root folder holds invoices, images, reports, and source code side by side with no discernible organization.
+Shared Google Drive folders accumulate clutter fast. Without enforced structure, uploads land wherever is convenient, and within weeks a root folder holds invoices, images, reports, and spreadsheets side by side with no discernible organization.
 
 The downstream effects compound quickly:
 
-- **File discovery becomes a search problem.** Finding the right document means scrolling through hundreds of unrelated files or guessing at someone else's naming convention.
-- **No audit trail.** There is no record of what was uploaded, when, or where it ended up. Compliance and accountability become manual exercises.
-- **Sorting is repetitive manual work.** Someone eventually has to go through the folder, identify file types, and move things — work that yields no business value and scales poorly.
-- **Inconsistency is the default.** Without automation enforcing structure, organization depends entirely on individual discipline, which erodes over time.
-
-The root cause is that Google Drive provides storage, not governance. This workflow provides the governance layer.
+- **File discovery becomes a search problem.** Finding the right document means scrolling through unrelated files or guessing at someone else's naming convention.
+- **No audit trail.** There's no record of what was uploaded, when, or where it ended up.
+- **Sorting is repetitive manual work** that yields no business value and scales poorly.
+- **Consistency depends entirely on individual discipline**, which erodes over time.
 
 ---
 
 ## Solution
 
-Drive File Organizer sits upstream of your storage and enforces structure automatically.
+Drive File Organizer polls a designated uploads folder on a fixed interval and enforces structure automatically.
 
-When a file is uploaded to the monitored root folder, n8n detects the event immediately via the Google Drive Trigger. A Switch node reads the file extension and routes execution down the correct path — images go to the Images folder, PDFs go to the PDFs folder, documents and spreadsheets follow the same logic. Each file is updated with metadata, physically moved, and removed from the root folder, all within a single workflow execution.
+Every 10 seconds, the workflow checks the uploads folder for files. A JavaScript node reads each file's extension (falling back to its MIME type when the extension is ambiguous or absent) and classifies it as an image, PDF, document, spreadsheet, or unsupported. A Switch node routes execution accordingly. For the four supported categories, the matching Google Drive file is renamed with a category suffix and then moved into its configured destination folder. Files that don't match any category are left where they are — they aren't renamed or moved.
 
-Once the file is in its destination, a JavaScript Code node constructs a structured log entry containing the filename, extension, destination, and a precise timestamp. That entry is appended to a Google Sheets audit log, and a branded HTML email is dispatched to the administrator confirming the action.
-
-The result is a Drive folder that stays clean by default, with a complete audit trail and instant visibility into every file that passes through it.
+Regardless of outcome, a JavaScript node builds a structured log entry (file name, extension, timestamp, and a status string describing what happened), appends it as a new row in a Google Sheets audit log, and a branded HTML email confirms the result.
 
 ---
 
 ## Architecture
 
-**Google Drive Trigger** — Listens for `fileCreated` events on the monitored root folder. This is the entry point: every upload fires a trigger event that initiates the workflow immediately without polling or scheduled checks.
+The workflow is 16 functional nodes plus a sticky note on the canvas documenting the four destination folder IDs.
 
-**Check File Type** — A Switch node operating in Rules mode. It inspects the incoming file's MIME type or extension and branches execution into one of five paths: Images (PNG/JPG), PDFs, Documents (DOCX), Spreadsheets (CSV), or Unsupported Files. Each path is mapped to a specific Google Drive destination folder ID, configured via the sticky note reference card embedded in the workflow canvas.
+**Poll Uploads Folder** is a Schedule Trigger configured with a `seconds` interval of `10`. This is a polling trigger, not an event listener — there is no Drive webhook or `fileCreated` event subscription in this workflow. Every 10 seconds the trigger fires and the workflow checks the uploads folder from scratch.
 
-**Update [Type] nodes** — For each file category, a Google Drive node first updates the file record with relevant metadata before the physical move. This ensures the file carries accurate information into its destination folder rather than inheriting stale metadata from the upload event.
+**Fetch Files from Uploads** is a Google Drive node using the `fileFolder` search operation. It queries for files whose parent is the configured uploads folder and that are not trashed, returning all matches on each run.
 
-**Move [Type] File nodes** — A second Google Drive node per category executes the actual folder transfer, moving the file from the root into its designated destination. The two-step update-then-move pattern ensures metadata integrity throughout the operation.
+**Classify File** is a JavaScript Code node. It resolves the file's effective MIME type (checking a shortcut's target MIME type first, then falling back to the file's own MIME type), extracts the extension from the file name, and — if no extension is present — infers one from the MIME type for native Google files (spreadsheet → `gsheet`, document → `gdoc`, presentation → `gslides`, pdf → `pdf`, image → `png`). It then categorizes the file:
 
-**Prepare Log Entry** — A JavaScript Code node that runs after all routing paths converge. It processes execution metadata — filename, detected extension, destination folder name, ISO timestamp — and formats it into a structured object ready for Sheets ingestion. This is where raw trigger data gets shaped into a clean, queryable audit record.
+| Category | Matched by extension | Also matched by MIME type |
+|---|---|---|
+| `image` | png, jpg/jpeg, webp, gif, svg | contains "image" |
+| `pdf` | pdf | contains "pdf" |
+| `document` | doc, docx, txt, rtf, gdoc | contains "document" |
+| `spreadsheet` | csv, xls, xlsx, ods, gsheet | contains "spreadsheet" |
+| `unsupported` | anything else | anything else |
 
-**Log File Action** — A Google Sheets node that appends the prepared log entry to the `File Organizer Logs` spreadsheet. Each row records the timestamp, file name, file extension, and a human-readable status string describing where the file was moved. This sheet becomes the persistent audit trail for every file the workflow has ever processed.
+The node outputs the original file properties plus `cleanCategory` and `cleanExtension`.
 
-**Send Email** — A Gmail node that renders and delivers a branded HTML notification to the administrator. The email confirms the file name, displays the detected extension as a styled badge, and shows the pipeline route with a success indicator. Subject lines include the destination folder name, making inbox scanning fast.
+**Route by Category** is a Switch node in Rules mode with four explicit rules — matching `cleanCategory` against `image`, `pdf`, `document`, and `spreadsheet` — each renamed to a named output (`Images folder`, `PDFs folder`, `Documents folder`, `Spreadsheets folder`). Anything that matches none of the four rules falls through the node's built-in fallback output, renamed `Unsupported Files`.
 
-**END** — Execution terminates cleanly after every successful run.
+**Update Images / Update PDFs / Update Documents / Update Spreadsheets** are Google Drive nodes using the `update` operation. Each one renames the matched file by appending a category suffix to its existing name — `_IMG`, `_PDF`, `_DOC`, and `_CSV` respectively. These are rename steps, not general metadata updates.
+
+**Move PNG File / Move PDF File / Move Document File / Move CSV file** are Google Drive nodes using the `move` operation. Each relocates the just-renamed file from the uploads folder into its configured destination folder (the folder IDs in this export are placeholders with cached display names alongside them).
+
+**The unsupported branch** skips the Update/Move pair entirely and connects straight to `Prepare Log Entry`. Unsupported files are not renamed and are not moved — they remain in the uploads folder and are only reflected in the log and email.
+
+**Prepare Log Entry** is a JavaScript Code node. It reads the original file's data primarily from the `Classify File` node's output (falling back to the current item if that lookup fails), determines which branch actually ran by probing for output on the four `Move ...` nodes (with a category-based fallback if that check comes back empty), resolves a file extension through several fallback layers, and generates a timestamp in the `Asia/Kolkata` timezone formatted as `YYYY-MM-DD HH:mm:ss`. It outputs one object with `Timestamp`, `FileName`, `FileExtension`, and `Status` — where `Status` is a string like `Moved to PDFs Folder` or, for the unsupported branch, `Skipped - Unsupported File Type`.
+
+**Log File Action** is a Google Sheets node that appends a row to the "File Organizer Logs" spreadsheet, `Sheet1`, with exactly four columns: Timestamp, File Name, File Extension, and Status. There is no separate destination/folder column — that information lives inside the Status string.
+
+**Send Email** is a Gmail node that sends a branded HTML confirmation after the Sheets row is written. The subject line is built from the Status value (`⚙️ File Organizer: {{ Status }}`), and the body shows the file name, the extension as a styled badge, the pipeline route, and the processed timestamp.
+
+**END** is a No-Op node reached after every run that completes an email send, regardless of which branch — including the unsupported path — produced it.
 
 ---
 
 ## 📊 Workflow Diagram
 
-The pipeline's structural topology and conditional execution paths are mapped below:
-
 ```mermaid
 flowchart LR
-    A[Google Drive Trigger] --> B{"Check File Type"}
-    
-    B -- "Images" --> C1[Update Images] --> D1[Move PNG File]
-    B -- "PDFs" --> C2[Update PDFs] --> D2[Move PDF File]
-    B -- "Documents" --> C3[Update Documents] --> D3[Move Document File]
-    B -- "Spreadsheets" --> C4[Update Spreadsheets] --> D4[Move CSV file]
-    
-    D1 --> E[Prepare Log Entry]
-    D2 --> E
-    D3 --> E
-    D4 --> E
-    
-    E --> F[Log File Action]
-    F --> G[Send Email]
-    G --> H[END]
+    A[Poll Uploads Folder] --> B[Fetch Files from Uploads]
+    B --> C[Classify File]
+    C --> D{Route by Category}
+
+    D -- Images folder --> E1[Update Images] --> F1[Move PNG File]
+    D -- PDFs folder --> E2[Update PDFs] --> F2[Move PDF File]
+    D -- Documents folder --> E3[Update Documents] --> F3[Move Document File]
+    D -- Spreadsheets folder --> E4[Update Spreadsheets] --> F4[Move CSV file]
+    D -- Unsupported Files --> G[Prepare Log Entry]
+
+    F1 --> G
+    F2 --> G
+    F3 --> G
+    F4 --> G
+
+    G --> H[Log File Action]
+    H --> I[Send Email]
+    I --> J[END]
 ```
 
 ---
@@ -86,31 +101,30 @@ flowchart LR
 
 | Technology | Role |
 |---|---|
-| **n8n** | Workflow orchestration engine — hosts the automation, manages triggers, and connects all services |
-| **Google Drive Trigger** | Event listener that fires on `fileCreated` — provides instant detection without polling |
-| **Switch Node** | Rules-based router that classifies files by extension and directs execution to the correct branch |
-| **Google Drive** | Performs metadata updates and physical file moves into destination folders |
-| **JavaScript Code Node** | Constructs structured log entries from raw execution metadata with precise timestamps |
-| **Google Sheets** | Append-only audit log — every processed file is recorded with its name, extension, destination, and timestamp |
-| **Gmail** | Delivers branded HTML confirmation emails to the administrator after each successful file operation |
-| **HTML Email Template** | Custom email layout with extension badge, pipeline route, and status display |
+| **n8n** | Workflow orchestration engine |
+| **Schedule Trigger** | Polls the uploads folder on a fixed `seconds` interval (10s in this export) |
+| **Google Drive** | Folder search, file rename (update operation), and file move across five nodes |
+| **Switch Node** | Rules-based router with an explicit fallback output for unmatched categories |
+| **JavaScript Code Node (×2)** | Classifies files by extension/MIME (`Classify File`) and builds the audit log object (`Prepare Log Entry`) |
+| **Google Sheets** | Append-only audit log with four columns: Timestamp, File Name, File Extension, Status |
+| **Gmail** | Sends a branded HTML confirmation email after each run |
 
 ---
 
 ## Features
 
-- **Event-driven execution** — triggers immediately on file upload; no polling, no delay
-- **Automatic file classification** — reads file extensions and routes without any configuration per upload
-- **Extension-based routing** — dedicated pipeline paths for images, PDFs, documents, and spreadsheets
-- **Smart Switch branching** — rules-based logic with an unsupported-files fallback path
-- **Dual-step file processing** — metadata update followed by folder move ensures clean file records in the destination
-- **JavaScript metadata processing** — custom Code node constructs structured, queryable log objects
-- **Google Sheets audit logging** — persistent, append-only record of every file processed with full context
-- **Branded HTML email notifications** — confirms file name, extension, and destination route after each operation
-- **Modular per-type architecture** — each file category has its own isolated pipeline path, making individual routes easy to modify
-- **Unsupported file handling** — files with unrecognized extensions are routed to a fallback path rather than dropped silently
-- **Fully unattended operation** — no manual interaction required at any stage
-- **Extensible routing** — adding a new file type requires one additional Switch rule and a paired Update + Move node pair
+| Feature | Description |
+|---|---|
+| Scheduled polling | Checks the uploads folder every 10 seconds via a Schedule Trigger — not an event-driven Drive trigger |
+| Folder-scoped file discovery | Queries only files inside the configured uploads folder that aren't trashed |
+| Extension + MIME classification | JavaScript node categorizes files by extension first, MIME type as a fallback, including native Google file types |
+| Four-category routing | Images, PDFs, Documents, and Spreadsheets each get a dedicated rename-then-move path |
+| Unsupported-file fallback | Files matching no category skip renaming and moving, and are only logged |
+| Rename-before-move | Matched files are renamed with a category suffix (`_IMG`/`_PDF`/`_DOC`/`_CSV`) before relocation |
+| JavaScript-built audit entries | Log rows are constructed in code from execution metadata, including a status string per branch |
+| Timezone-aware timestamps | Log timestamps are generated in Asia/Kolkata, formatted `YYYY-MM-DD HH:mm:ss` |
+| Google Sheets logging | Every run — supported or unsupported — appends one row to the audit spreadsheet |
+| Branded email confirmation | Gmail notification with a status badge, file details, and the resulting pipeline route |
 
 ---
 
@@ -118,83 +132,65 @@ flowchart LR
 
 ### Workflow
 
-> **`images/workflow.png`**
->
-> ![n8n Workflow](images/workflow.png)
+![n8n Workflow](images/workflow.png)
 
-The complete workflow as it appears in the n8n editor, showing the Switch node's branching paths, the parallel Update + Move node pairs for each file type, and the shared logging and notification pipeline downstream.
-
----
+The full canvas: the Schedule Trigger and fetch/classify/route nodes on the left, the four Update→Move pairs branching from the Switch node, and the shared logging and email pipeline on the right. The sticky note documents the four destination folder IDs.
 
 ### Google Sheets Audit Log
 
-> **`images/google_sheet.png`**
->
-> ![Google Sheets Log](images/google-sheet.png)
+![Google Sheets Log](images/google-sheet.png)
 
-The `File Organizer Logs` spreadsheet, capturing a live execution record. Each row represents one processed file and includes the timestamp, original file name, detected extension, and destination status.
-
----
+The "File Organizer Logs" spreadsheet with its four columns — Timestamp, File Name, File Extension, Status — capturing a mix of image, PDF, spreadsheet, and document runs.
 
 ### Email Notification
 
-> **`images/email_alert.png`**
->
-> ![Email Notification](images/email-alert.png)
+![Email Notification](images/email-alert.png)
 
-A live example of the administrator notification. The email displays the "CORE AUTOMATION ENGINE" status badge, a confirmation heading, and a structured table with the file name, extension badge, and a green pipeline route confirmation.
+A captured confirmation email for a PDF run: the "CORE AUTOMATION ENGINE" badge, the "File Successfully Organized" heading, and a table showing the file name, extension badge, and pipeline route.
 
 ---
 
 ## How It Works
 
-1. **A file is uploaded to the root folder.** The Google Drive Trigger detects the `fileCreated` event instantly and passes the file's metadata — name, MIME type, ID, and parent folder — downstream as the initial payload.
-
-2. **The file extension is read.** The Check File Type Switch node evaluates the file against a set of configured rules. The extension determines which branch receives execution: Images, PDFs, Documents, Spreadsheets, or Unsupported Files.
-
-3. **File metadata is updated.** The first Google Drive node on the matched branch updates the file record with any required metadata before the move operation begins.
-
-4. **The file is moved to its destination.** A second Google Drive node physically relocates the file from the root folder to the designated destination folder, mapped by the folder ID configured in the Switch rule.
-
-5. **Execution paths converge.** Once the file is in its destination, all branching paths merge back into a single downstream pipeline for logging and notification.
-
-6. **A log entry is prepared.** The JavaScript Code node runs and constructs a structured object from the execution data: file name, detected extension, destination folder name, and an ISO-formatted timestamp.
-
-7. **The log is written to Google Sheets.** The Log File Action node appends the structured entry to the `File Organizer Logs` spreadsheet as a new row under the Timestamp, File Name, File Extension, and Status columns.
-
-8. **A confirmation email is generated.** The Send Email node renders the HTML email template, populating it with the file name, extension badge, and pipeline route string derived from the current execution.
-
-9. **The email is delivered.** Gmail dispatches the notification to the configured recipient. The subject line names the destination folder, making it scannable without opening the message.
-
-10. **Execution ends.** The workflow terminates cleanly. The root folder remains empty, the Sheets log has a new row, and the administrator has a confirmation in their inbox.
+1. **The Schedule Trigger fires** every 10 seconds.
+2. **Files are fetched** from the configured uploads folder via a Drive folder-scoped search.
+3. **Each file is classified** by the `Classify File` code node using its extension, with MIME-type inference as a fallback.
+4. **The Switch node routes** the file into one of four supported categories, or into the unsupported fallback if nothing matches.
+5. **Supported branches rename the file**, appending a category suffix (`_IMG`, `_PDF`, `_DOC`, or `_CSV`).
+6. **Supported branches move the renamed file** into its configured destination folder.
+7. **Unsupported files skip renaming and moving** entirely and go straight to logging.
+8. **`Prepare Log Entry` builds the audit object** — file name, extension, Asia/Kolkata timestamp, and a status string describing the outcome.
+9. **The row is appended to Google Sheets.**
+10. **A confirmation email is sent** via Gmail, with the subject and body built from the status string.
+11. **Execution reaches `END`** on every path, supported or not.
 
 ---
 
 ## Sample Input
 
-Any file uploaded to the monitored root folder triggers the workflow. Representative examples:
+The classifier supports more than the four examples below — see the extension/MIME table in the Architecture section for the full set. These are representative:
 
 ```
 portrait.png          →  Images folder
 Broken_INVOICE.pdf    →  PDFs folder
 Q3_Report.docx        →  Documents folder
 Sales_Data.csv        →  Spreadsheets folder
-archive.zip           →  Unsupported Files path
+archive.zip           →  Unsupported Files path (stays in the uploads folder, only logged)
 ```
-
-No configuration is required per upload. The routing rules handle classification automatically.
 
 ---
 
 ## Sample Output
 
-**Google Sheets row (one per execution):**
+**Google Sheets rows** (four columns only — no separate destination column; the destination is embedded in Status):
 
 ```
-Timestamp            | File Name            | File Extension | Status
----------------------|----------------------|----------------|-------------------------
-2026-06-26 16:14 IST | portrait.png         | png            | Moved to Images Folder
-2026-06-26 16:14 IST | Broken_INVOICE.pdf   | pdf            | Moved to PDFs Folder
+Timestamp            | File Name           | File Extension | Status
+----------------------|--------------------|-----------------|--------------------------
+2026-07-24 18:22:xx   | Exercise.png       | png             | Moved to Images Folder
+2026-07-25 14:19:xx   | Broken_INVOICE.pdf | pdf             | Moved to PDFs Folder
+2026-07-25 14:30:xx   | Invoice DB         | gsheet          | Moved to Spreadsheets Folder
+2026-07-25 14:3x:xx   | Test file.docx     | docx            | Moved to Documents Folder
 ```
 
 **Email notification:**
@@ -215,45 +211,48 @@ Subject: ⚙️ File Organizer: Moved to PDFs Folder
 │  FILE EXTENSION   .pdf                                      │
 │  PIPELINE ROUTE   ✅ Moved to PDFs Folder                   │
 └─────────────────────────────────────────────────────────────┘
-
-Timestamp:   2026-06-26 16:17 IST
 ```
+
+---
+
+## Known Behavior & Limitations
+
+- **Polling, not events.** The trigger is a 10-second Schedule Trigger poll of the uploads folder, not a Google Drive `fileCreated` event subscription.
+- **Unsupported files aren't relocated.** They're logged with a `Skipped - Unsupported File Type` status but stay in the uploads folder — there's no Move node on that branch.
+- **Presentation files fall through to unsupported.** The classifier infers a `gslides` extension for presentation MIME types, but no category rule matches `gslides`, so these files are routed as unsupported rather than to a dedicated folder.
+- **No dedicated destination column in the audit log.** The Sheets schema is Timestamp / File Name / File Extension / Status only; where a file went is read from the Status text.
+- **Placeholder configuration throughout.** The uploads folder ID, the four destination folder IDs, the logging spreadsheet ID, and the email recipient are all placeholder values in this export.
+- **Exported as inactive.** The workflow JSON has `"active": false`.
+- **"Update" nodes rename, they don't set broader metadata.** The only field changed is the file name, via a category suffix.
 
 ---
 
 ## Future Improvements
 
-The current workflow handles four file types across a single monitored folder. The architecture is designed to scale with minimal structural changes:
-
-- **Additional file type support** — extend the Switch node with rules for `.xlsx`, `.pptx`, `.mp4`, `.zip`, `.txt`, and any other extension the use case requires
-- **AI-powered document classification** — use an LLM node to classify ambiguous files by content rather than extension alone
-- **OCR processing for scanned PDFs** — route PDF uploads through an OCR API before logging, extracting searchable text from scanned documents
-- **Duplicate file detection** — check the Sheets log before moving a file; flag or skip duplicates with the same name and extension
-- **Slack and Microsoft Teams notifications** — add parallel notification branches alongside Gmail for team-facing alerts
-- **Google Drive Shared Drive support** — extend trigger and move operations to work with shared organizational drives
-- **File versioning** — before moving, create a versioned copy in an archive folder for rollback capability
-- **Metadata tagging** — apply Drive labels or custom properties to moved files for richer filtering and search
-- **PostgreSQL or Airtable logging** — replace or supplement the Sheets log with a queryable relational store
-- **Dashboard analytics** — connect the Sheets data to Looker Studio for a live file volume and type breakdown dashboard
-- **Error path handling** — build a dedicated notification for upload events that fail to match any route, with full diagnostic context
-- **Docker deployment** — containerize the n8n instance for consistent, portable production hosting
+- **Event-based triggering** — replace the 10-second poll with a genuine Drive change/event trigger if execution volume becomes a concern
+- **Additional categories** — presentations, video, and archive types, each with their own destination folder
+- **AI-powered content classification** — classify ambiguous files by content rather than extension/MIME alone
+- **Duplicate detection** — check the Sheets log before moving a file with a name that's already been processed
+- **Slack or Teams notifications** — alongside the existing Gmail confirmation
+- **Destination column in the audit log** — split the folder name out of the Status string into its own field
+- **Error-path handling** — dedicated diagnostics for failed Drive operations, distinct from the unsupported-file path
+- **Dashboard analytics** — connect the Sheets log to a BI tool for volume and type breakdowns over time
 
 ---
 
 ## Repository Structure
 
 ```
-n8n-workflows/
-└── drive-file-organizer/
-    ├── drive-file-organizer.json   # Exported n8n workflow (importable directly)
-    ├── README.md
-    └── images/
-        ├── workflow.png            # n8n editor screenshot
-        ├── google-sheet.png        # Google Sheets audit log screenshot
-        └── email-alert.png         # Gmail notification screenshot
+drive-file-organizer/
+├── images/
+│   ├── email-alert.png
+│   ├── google-sheet.png
+│   └── workflow.png
+├── drive-file-organizer.json
+└── README.md
 ```
 
-To deploy: import `Drive-File-Organizer.json` into your n8n instance, connect Google Drive, Google Sheets, and Gmail credentials, update the destination folder IDs in the Switch node rules, and activate. The workflow begins organizing uploads immediately.
+**To deploy:** import `drive-file-organizer.json` into your n8n instance; connect Google Drive, Google Sheets, and Gmail credentials; set the uploads folder ID being polled and the four destination folder IDs referenced in the sticky note; point the Sheets node at your logging spreadsheet; set the recipient address in `Send Email`; review the 10-second polling interval on the Schedule Trigger and adjust if needed; then activate.
 
 ---
 
@@ -262,20 +261,18 @@ To deploy: import `Drive-File-Organizer.json` into your n8n instance, connect Go
 **Shaban Alam**
 Python Automation Developer · n8n Workflow Specialist · AI Integration Engineer
 
-Building production-ready automation systems for businesses that want to eliminate repetitive manual work.
+Building automation systems for businesses that want to eliminate repetitive manual work.
 
 - **GitHub:** [github.com/Shaban27-dev](https://github.com/Shaban27-dev)
 - **Email:** shabandev27@gmail.com
 - **Available for:** freelance automation projects, workflow consulting, Google Workspace integrations, API pipelines
 
-> Open to projects involving n8n, Python automation, Google Workspace automation, event-driven systems, file processing pipelines, AI workflow integration, and process automation.
+> Open to projects involving n8n, Python automation, Google Workspace automation, file processing pipelines, AI workflow integration, and process automation.
 
 ---
 
 ## Summary
 
-Drive File Organizer is a complete, event-driven file management automation built for production use. It demonstrates real-time Google Drive event handling, rules-based conditional routing across multiple parallel branches, dual-step file processing with metadata management, JavaScript-based log construction, Google Sheets audit logging, and branded HTML email delivery — all orchestrated through n8n without application code.
+Drive File Organizer is a polling-based file management automation: a 10-second Schedule Trigger, Drive-based file discovery, JavaScript classification by extension and MIME type, Switch-based routing across four categories with an explicit unsupported fallback, rename-then-move Drive operations, JavaScript-built audit entries with Asia/Kolkata timestamps, Google Sheets logging, and a branded Gmail confirmation. Two of the workflow's steps run as JavaScript Code nodes rather than pre-built n8n operations. As exported, the folder IDs, spreadsheet ID, and recipient address are placeholders and the workflow is inactive — it's a reference implementation to configure and activate, not a live production deployment.
 
-The architecture is intentionally modular: the routing layer, the logging layer, and the notification layer are independently configurable. Adding a new file type, a new notification channel, or a new logging destination requires targeted changes to one section of the workflow without touching the rest.
-
-This project is part of an active automation portfolio. Additional workflows covering price monitoring, invoice processing, lead enrichment, and job alert systems are available in the linked GitHub repository.
+This project is part of an active automation portfolio. Additional workflows covering price monitoring, invoice processing, lead enrichment, and related pipelines are available in the linked GitHub profile.
