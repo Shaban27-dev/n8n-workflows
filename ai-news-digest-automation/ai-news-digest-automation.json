@@ -390,16 +390,11 @@
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false,
-    "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner"
+    "availableInMCP": false
   },
-  "versionId": "4e8b65cd-20a8-4f47-a636-c1d0fcdb02cd",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "0df711be81f430d0a4ed6664b0f8988a4f5bfe5b8460680d6fb401a65f5f4976"
-  },
+  "versionId": "",
+  "meta": {},
   "nodeGroups": [],
-  "id": "OuTwbvU6cMeBrZH5",
+  "id": "",
   "tags": []
 }
