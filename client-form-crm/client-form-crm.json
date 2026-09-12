@@ -3,79 +3,341 @@
   "nodes": [
     {
       "parameters": {
-        "formId": "your-form-id-here"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0734af9-cde3-4d90-9d39-4562532ae8fd",
+              "name": "name",
+              "value": "={{ $json['What is your Name?'] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "f3dffb32-7e66-4a46-a91c-27dff1116142",
+              "name": "email",
+              "value": "={{ $json['What’s your email address?'] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "144c58e3-0121-40b0-9c72-9bec5b3e846e",
+              "name": "inquiryDetails",
+              "value": "={{ $json['Please describe your project briefly.'] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ab1c4945-57df-40f2-8af0-00f5943ea5b6",
+              "name": "budgetRange",
+              "value": "={{ $json['What is your budget for this project?'] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "133c9be8-7844-4b4b-bb85-ac918ed8e066",
+              "name": "moveInDate",
+              "value": "={{ $json['When are you looking to start?'] || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "f9e8f7bc-4cde-4cc3-a305-1ded3ccf592f",
+              "name": "source",
+              "value": "typeform",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -592,
+        672
+      ],
+      "id": "05b0e996-43d0-4ebe-b2c2-515515afa5aa",
+      "name": "Normalize Typeform Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2eecfe86-51b4-4fc5-96d8-b264b1be350e",
+              "name": "name",
+              "value": "={{ $json.body?.name ?? $json.name ?? $json['What is your Name?'] ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "0a7856ac-bc9e-42a3-9586-5291c28d4cd7",
+              "name": "email",
+              "value": "={{ $json.body?.email ?? $json.email ?? $json['What’s your email address?'] ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "bb14cc7e-32d5-4a1d-b52e-129d8ff97d61",
+              "name": "inquiryDetails",
+              "value": "={{ $json.body.inquiryDetails }}",
+              "type": "string"
+            },
+            {
+              "id": "61a72f5d-c14b-41aa-8683-06a2eb226e92",
+              "name": "budgetRange",
+              "value": "={{ $json.body.budgetRange }}",
+              "type": "string"
+            },
+            {
+              "id": "c8949ce3-ff0e-4322-bdb5-17afaa900171",
+              "name": "moveInDate",
+              "value": "={{ $json.body?.moveInDate ?? $json.body?.['Move-in Date'] ?? $json.moveInDate ?? $json['Move-in Date'] ?? $json['When are you looking to start?'] ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ba1786b1-6e15-4f6c-861e-04f297a2330f",
+              "name": "source",
+              "value": "webhook",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -592,
+        864
+      ],
+      "id": "0e7038c9-380a-4b49-a03d-f8da34b9a542",
+      "name": "Normalize Webhook Lead"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n\nfunction cleanString(value) {\n  if (value === null || value === undefined) return '';\n  return String(value).trim();\n}\n\nfunction parseAmount(raw, inheritedUnit = '') {\n  const num = Number(String(raw).replace(/,/g, ''));\n  if (!Number.isFinite(num)) return 0;\n  const unit = String(inheritedUnit || '').toLowerCase();\n  if (unit === 'k') return Math.round(num * 1_000);\n  if (unit === 'm') return Math.round(num * 1_000_000);\n  return Math.round(num);\n}\n\nfunction parseBudget(value) {\n  const text = cleanString(value).toLowerCase();\n  if (!text) return { min: 0, max: 0, value: 0 };\n\n  // Handles ranges such as 5k-10k, 5,000 - 10,000, or 5k to 10k.\n  const range = text.match(/[$€£₹]?\\s*([\\d,.]+)\\s*([km]?)\\s*(?:-|–|—|to)\\s*[$€£₹]?\\s*([\\d,.]+)\\s*([km]?)/i);\n  if (range) {\n    const firstUnit = range[2] || '';\n    const secondUnit = range[4] || firstUnit;\n    const min = parseAmount(range[1], firstUnit);\n    const max = parseAmount(range[3], secondUnit);\n    return { min: Math.min(min, max), max: Math.max(min, max), value: Math.min(min, max) };\n  }\n\n  const single = text.match(/([\\d,.]+)\\s*([km]?)/i);\n  if (!single) return { min: 0, max: 0, value: 0 };\n\n  const amount = parseAmount(single[1], single[2]);\n\n  // A ceiling such as \"under 5k\" should not qualify as a 5k+ high-budget lead.\n  if (/\\b(under|below|less than|up to|maximum|max)\\b/i.test(text)) {\n    return { min: 0, max: amount, value: 0 };\n  }\n\n  // A floor such as \"5k+\" qualifies at the stated threshold.\n  return { min: amount, max: amount, value: amount };\n}\n\nfunction validIsoDate(value) {\n  const text = cleanString(value);\n  if (!text) return null;\n  const match = text.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n  if (!match) return null;\n  const year = Number(match[1]);\n  const month = Number(match[2]);\n  const day = Number(match[3]);\n  const date = new Date(Date.UTC(year, month - 1, day));\n  if (\n    date.getUTCFullYear() !== year ||\n    date.getUTCMonth() !== month - 1 ||\n    date.getUTCDate() !== day\n  ) return null;\n  return text;\n}\n\nfor (const item of $input.all()) {\n  const name = cleanString(item.json.name);\n  const email = cleanString(item.json.email).toLowerCase();\n  const inquiryDetails = cleanString(item.json.inquiryDetails);\n  const budgetRange = cleanString(item.json.budgetRange);\n  const moveInDate = validIsoDate(item.json.moveInDate);\n  const source = cleanString(item.json.source) || 'unknown';\n\n  const emailValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);\n\n  const missingFields = [];\n  if (!name) missingFields.push('Name');\n  if (!email) missingFields.push('Email');\n  else if (!emailValid) missingFields.push('Valid Email');\n  if (!inquiryDetails || inquiryDetails.length < 10) missingFields.push('Inquiry Details');\n  if (!budgetRange) missingFields.push('Budget Range');\n  if (!moveInDate) missingFields.push('Move-in Date');\n\n  const budget = parseBudget(budgetRange);\n  let leadPriority = 'Low Budget';\n  if (missingFields.length > 0) {\n    leadPriority = 'Missing Info';\n  } else if (budget.min >= 5000) {\n    leadPriority = 'High Budget';\n  }\n\n  results.push({\n    json: {\n      name,\n      email,\n      emailValid,\n      inquiryDetails,\n      budgetRange,\n      budgetMin: budget.min,\n      budgetMax: budget.max,\n      budgetValue: budget.value,\n      moveInDate,\n      source,\n      leadPriority,\n      missingFields,\n      qualifiedAt: new Date().toISOString()\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        768
+      ],
+      "id": "be44017b-d6ff-49d5-b22e-0f837812fd1f",
+      "name": "Validate & Qualify Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90eb0023-f595-4a07-b965-4136b866917c",
+              "name": "name",
+              "value": "={{ $('Validate & Qualify Lead').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "d9d9d804-e5cd-4a45-bf39-99350c236194",
+              "name": "email",
+              "value": "={{ $('Validate & Qualify Lead').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "c0f6b9f0-6c3d-4a0f-9a61-6f5a7cf6f0af",
+              "name": "emailValid",
+              "value": "={{ $('Validate & Qualify Lead').item.json.emailValid }}",
+              "type": "boolean"
+            },
+            {
+              "id": "e7df6def-da7c-4314-b2f7-e1c6648dfef0",
+              "name": "inquiryDetails",
+              "value": "={{ $('Validate & Qualify Lead').item.json.inquiryDetails }}",
+              "type": "string"
+            },
+            {
+              "id": "52dee906-1203-4c7d-8c21-f14c9791a755",
+              "name": "budgetRange",
+              "value": "={{ $('Validate & Qualify Lead').item.json.budgetRange }}",
+              "type": "string"
+            },
+            {
+              "id": "8dc3bc88-4cbf-456a-a7f3-27622c5dcab8",
+              "name": "budgetMin",
+              "value": "={{ $('Validate & Qualify Lead').item.json.budgetMin }}",
+              "type": "number"
+            },
+            {
+              "id": "595bc3c4-120d-4a0f-bd32-6d9972f81c05",
+              "name": "budgetMax",
+              "value": "={{ $('Validate & Qualify Lead').item.json.budgetMax }}",
+              "type": "number"
+            },
+            {
+              "id": "51d58af7-32cf-48d2-9a75-107d03941536",
+              "name": "budgetValue",
+              "value": "={{ $('Validate & Qualify Lead').item.json.budgetValue }}",
+              "type": "number"
+            },
+            {
+              "id": "526a9055-4d9e-417d-b3fa-ec6c89758713",
+              "name": "moveInDate",
+              "value": "={{ $('Validate & Qualify Lead').item.json.moveInDate }}",
+              "type": "string"
+            },
+            {
+              "id": "a0580cd1-dee3-40dc-bfa2-992c687f974b",
+              "name": "source",
+              "value": "={{ $('Validate & Qualify Lead').item.json.source }}",
+              "type": "string"
+            },
+            {
+              "id": "afa99df8-b8d3-451d-bb44-ddc07e7e723c",
+              "name": "leadPriority",
+              "value": "={{ $('Validate & Qualify Lead').item.json.leadPriority }}",
+              "type": "string"
+            },
+            {
+              "id": "c0095bfc-f0b7-4f47-9c5d-a6264fed1b46",
+              "name": "missingFields",
+              "value": "={{ $('Validate & Qualify Lead').item.json.missingFields }}",
+              "type": "array"
+            },
+            {
+              "id": "8d7b07ab-7422-485e-a923-428de52cb9cc",
+              "name": "qualifiedAt",
+              "value": "={{ $('Validate & Qualify Lead').item.json.qualifiedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "2c9cd87a-8210-4a56-9a0d-5ee454b418f9",
+              "name": "crmPageId",
+              "value": "={{ $json.id || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "4e28149e-655a-43b5-a12f-82c1e2fb3c6d",
+              "name": "crmUrl",
+              "value": "={{ $json.url || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        768
+      ],
+      "id": "ba3f7363-609c-4cea-8631-b4a15cbb75bb",
+      "name": "Prepare Routed Lead"
+    },
+    {
+      "parameters": {
+        "formId": "your-typeform-form-id"
       },
       "type": "n8n-nodes-base.typeformTrigger",
       "typeVersion": 1.1,
       "position": [
-        -544,
-        208
+        -816,
+        672
       ],
-      "id": "5250aa7c-2b01-46b1-97b5-fd973d3aa99b",
+      "id": "63c94083-296a-44c5-822b-171211c27551",
       "name": "Catch New Lead",
-      "webhookId": "your-webhook-id-here",
+      "webhookId": "your-typeform-webhook-id",
       "credentials": {
         "typeformApi": {
-          "id": "your-credentials-id-here",
+          "id": "",
           "name": "Typeform account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const prunedItems = [];\n\nfor (const item of $input.all()) {\n  // 1. Extract raw values from the previous node using the updated keys\n  const rawName = (item.json[\"Name\"] || \"\").trim();\n  const rawEmail = (item.json[\"Email\"] || \"\").trim();\n  const rawDescription = (item.json[\"Inquiry Details\"] || \"\").trim();\n  const rawBudget = (item.json[\"Budget Range\"] || \"\").trim();\n  const rawStartDate = (item.json[\"Move-in Date\"] || \"\").trim();\n\n  // 2. Set explicit \"Missing\" text labels if any value is empty\n  const name = rawName || \"Name Missing\";\n  const email = rawEmail || \"Email Missing\";\n  const description = rawDescription || \"Inquiry Details Missing\";\n  const budgetDisplay = rawBudget || \"Budget Range Missing\";\n  const startDate = rawStartDate || \"Move-in Date Missing\";\n\n  // 3. Extract a clean numerical value from the budget string (removes commas first)\n  const cleanBudgetStr = budgetDisplay.replace(/,/g, '');\n  const budgetMatch = cleanBudgetStr.match(/\\d+/);\n  const numericBudget = budgetMatch ? parseInt(budgetMatch[0], 10) : 0;\n\n  // 4. Lead Scoring & Routing Logic (assigned to Lead Priority)\n  let priority = \"Low Budget\"; // Default baseline status\n\n  // Flags \"Missing Info\" if ANY field is empty OR description is under 10 characters\n  if (!rawName || !rawEmail || !rawDescription || rawDescription.length < 10 || !rawBudget || !rawStartDate) {\n    priority = \"Missing Info\";\n  } else if (numericBudget >= 5000) {\n    priority = \"High Budget\";\n  }\n\n  // 5. Build and isolate ONLY the exact output structure requested\n  prunedItems.push({\n    json: {\n      \"Name\": name,\n      \"Email\": email,\n      \"Inquiry Details\": description,\n      \"Budget Range\": budgetDisplay,\n      \"Budget Value\": numericBudget,\n      \"Move-in Date\": startDate,\n      \"Lead Priority\": priority\n    }\n  });\n}\n\nreturn prunedItems;"
+        "httpMethod": "POST",
+        "path": "your-webhook-path",
+        "options": {}
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
       "position": [
-        -96,
-        208
+        -816,
+        864
       ],
-      "id": "3eeb7b40-ce7c-4d1e-b303-9b036da93e31",
-      "name": "Evaluate Lead Score"
+      "id": "f9bc7192-1d2f-40db-b3b3-051e1d0b259a",
+      "name": "Catch Leads from Webhook",
+      "webhookId": "your-webhook-id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b737aa3a-cde7-4bc6-a975-5557f61c83c5",
+              "leftValue": "={{ $json.moveInDate }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -144,
+        768
+      ],
+      "id": "d143628a-bf73-4189-90b5-272af9dfce27",
+      "name": "Has Move-in Date?"
     },
     {
       "parameters": {
         "resource": "databasePage",
         "databaseId": {
           "__rl": true,
-          "value": "your-database-id-here",
+          "value": "your-database-id",
           "mode": "list",
           "cachedResultName": "CRM Log Lead",
-          "cachedResultUrl": "https://app.notion.com/p/your-database-id-here"
+          "cachedResultUrl": "https://app.notion.com/p/your-database-id"
         },
         "title": "Client Leads",
         "propertiesUi": {
           "propertyValues": [
             {
               "key": "Name|title",
-              "title": "={{ $json.Name }}"
+              "title": "={{ $json.name }}"
             },
             {
               "key": "Email|email",
-              "emailValue": "={{ $json.Email }}"
+              "emailValue": "={{ $json.email }}"
             },
             {
               "key": "Inquiry Details|rich_text",
-              "textContent": "={{ $json['Inquiry Details'] }}"
+              "textContent": "={{ $json.inquiryDetails }}"
             },
             {
               "key": "Move-in Date|date",
-              "includeTime": false,
-              "date": "={{ $json['Move-in Date'] }}",
+              "date": "={{ $json.moveInDate || undefined }}",
               "timezone": "Asia/Kolkata"
             },
             {
               "key": "Budget Range|rich_text",
-              "textContent": "={{ $json['Budget Range'] }}"
+              "textContent": "={{ $json.budgetMin }} - {{ $json.budgetMax }}"
             },
             {
               "key": "Budget Value|number",
-              "numberValue": "={{ $json['Budget Value'] }}"
+              "numberValue": "={{ $json.budgetValue }}"
             },
             {
               "key": "Status|rich_text",
-              "textContent": "={{ $json['Lead Priority'] }}"
+              "textContent": "={{ $json.leadPriority }}"
             }
           ]
         },
@@ -84,101 +346,75 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        128,
-        208
+        80,
+        672
       ],
-      "id": "07ee6681-653b-4922-9b15-9ac7e746705f",
+      "id": "590bdbda-e0a9-4d2a-a294-122c131e2d97",
       "name": "Log Lead to CRM",
       "credentials": {
         "notionApi": {
-          "id": "your-notion-credentials-id-here",
+          "id": "your-notion-credentials-id",
           "name": "Client Form → CRM"
         }
       }
     },
     {
       "parameters": {
-        "sendTo": "youremail@gmail.com",
-        "subject": "=Re: Your project inquiry with  Your Name",
-        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>Project Inquiry Update</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f4f6f8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333; -webkit-font-smoothing: antialiased;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f4f6f8; padding: 40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden;\">\n          \n          <tr>\n            <td style=\"background-color: #1a2530; padding: 25px 40px; text-align: left;\">\n              <span style=\"color: #ffffff; font-size: 18px; font-weight: 700; letter-spacing: 1px;\">HASHNAB AUTOMATION</span>\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"padding: 40px;\">\n              <p style=\"font-size: 16px; line-height: 1.6; margin-top: 0; margin-bottom: 20px; color: #1a2530;\">\n                Hi {{ $json.name }},\n              </p>\n              \n              <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 20px; color: #4a5568;\">\n                Thank you so much for reaching out and sharing the details of your project! We truly appreciate you taking the time to consider us for this initiative.\n              </p>\n              \n              <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 24px; color: #4a5568;\">\n                After reviewing your goals and estimated budget, it looks like this project falls just below our current minimum engagement threshold for custom developments. To ensure our clients get maximum ROI, our targeted build pipelines typically begin at <strong style=\"color: #1a2530;\">$5,000</strong>.\n              </p>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f7fafc; border-left: 4px solid #3182ce; border-radius: 4px; margin-bottom: 24px;\">\n                <tr>\n                  <td style=\"padding: 20px;\">\n                    <h4 style=\"margin: 0 0 8px 0; font-size: 13px; color: #2b6cb0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;\">Our Recommendation</h4>\n                    <p style=\"margin: 0; font-size: 14px; line-height: 1.5; color: #2d3748;\">\n                      Because we want to point you in the right direction, we highly recommend checking out platforms like <strong>Upwork</strong> or vetted template marketplaces. These are fantastic options for launching projects successfully within your current budget tier!\n                    </p>\n                  </td>\n                </tr>\n              </table>\n              \n              <p style=\"font-size: 15px; line-height: 1.6; margin-bottom: 32px; color: #4a5568;\">\n                We wish you the absolute best of luck with your project launch, and hope our paths cross again in the future as your business grows.\n              </p>\n              \n              <hr style=\"border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 24px;\">\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <p style=\"margin: 0; font-size: 15px; color: #4a5568;\">Warm regards,</p>\n                    <p style=\"margin: 6px 0 2px 0; font-size: 16px; font-weight: 700; color: #1a2530;\">Shaban Alam</p>\n                    <p style=\"margin: 0; font-size: 13px; color: #718096;\">Founder &amp; Principal Automation Architect</p>\n                    <p style=\"margin: 2px 0 0 0; font-size: 13px; font-weight: 600; color: #3182ce;\">Hashnab Automation</p>\n                  </td>\n                </tr>\n              </table>\n              \n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"background-color: #f7fafc; padding: 20px 40px; text-align: center; border-top: 1px solid #edf2f7;\">\n              <p style=\"margin: 0; font-size: 12px; color: #a0aec0;\">\n                This is an automated operational transmission from Your Name.\n              </p>\n            </td>\n          </tr>\n          \n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "your-database-id",
+          "mode": "list",
+          "cachedResultName": "CRM Log Lead",
+          "cachedResultUrl": "https://app.notion.com/p/your-database-id"
+        },
+        "title": "Client Leads",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{ $json.name }}"
+            },
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json.email }}"
+            },
+            {
+              "key": "Inquiry Details|rich_text",
+              "textContent": "={{ $json.inquiryDetails }}"
+            },
+            {
+              "key": "Move-in Date|date",
+              "date": "={{ $json.moveInDate || undefined }}"
+            },
+            {
+              "key": "Budget Range|rich_text",
+              "textContent": "={{ $json.budgetRange }}"
+            },
+            {
+              "key": "Budget Value|number",
+              "numberValue": "={{ $json.budgetValue }}"
+            },
+            {
+              "key": "Status|rich_text",
+              "textContent": "={{ $json.leadPriority }}"
+            }
+          ]
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.gmail",
+      "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        576,
-        16
+        80,
+        864
       ],
-      "id": "cfa3152c-b55e-4f08-a2ae-8c81fb0c8180",
-      "name": "Email: Polite Redirect",
-      "webhookId": "your-email-webhook-id-here",
+      "id": "b68cf3a6-c4e7-4942-93c4-841e7843ddc1",
+      "name": "Log Lead to CRM — No Date",
       "credentials": {
-        "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credentials-id-here",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sendTo": "=youremail@gmail.com",
-        "subject": "=Quick question regarding your project inquiry - Your Name",
-        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>Project Details Request</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #334155; -webkit-font-smoothing: antialiased;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f8fafc; padding: 40px 20px;\">\n    <tr>\n      <td align=\"center\">\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03); overflow: hidden; border: 1px solid #e2e8f0;\">\n          \n          <tr>\n            <td style=\"background-color: #0f172a; height: 6px; font-size: 0; line-height: 0;\">&nbsp;</td>\n          </tr>\n          \n          <tr>\n            <td style=\"padding: 40px 35px;\">\n              \n              <p style=\"margin: 0 0 20px 0; font-size: 16px; line-height: 1.5; color: #0f172a; font-weight: 600;\">\n                Hi {{ $json.name }},\n              </p>\n              \n              <p style=\"margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #334155;\">\n                Thanks for submitting your inquiry via our client portal! We are incredibly excited about the prospect of helping you optimize and accelerate your business operations.\n              </p>\n              \n              <p style=\"margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #334155;\">\n                Our engineering team reviewed your submission, but we noticed we are missing a few crucial details required to accurately evaluate your infrastructure requirements and scope out a highly accurate custom quote for you.\n              </p>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f1f5f9; border-radius: 8px; margin-bottom: 28px;\">\n                <tr>\n                  <td style=\"padding: 25px;\">\n                    <p style=\"margin: 0 0 14px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569;\">\n                      Could you please clarify a bit more context regarding:\n                    </p>\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                      <tr>\n                        <td valign=\"top\" style=\"padding: 6px 10px 6px 0; font-size: 15px; color: #0f172a; font-weight: bold;\">•</td>\n                        <td style=\"padding: 6px 0; font-size: 14px; line-height: 1.5; color: #334155;\">\n                          <strong>The core workflow bottlenecks</strong> you are trying to solve right now.\n                        </td>\n                      </tr>\n                      <tr>\n                        <td valign=\"top\" style=\"padding: 6px 10px 6px 0; font-size: 15px; color: #0f172a; font-weight: bold;\">•</td>\n                        <td style=\"padding: 6px 0; font-size: 14px; line-height: 1.5; color: #334155;\">\n                          <strong>Any specific software tools</strong>, platforms, or internal databases you need seamlessly integrated.\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n              </table>\n              \n              <p style=\"margin: 0 0 32px 0; font-size: 15px; line-height: 1.6; color: #334155;\">\n                Simply <strong>reply directly to this email</strong> with your thoughts! Once we catch those additional details, we will instantly pass them to engineering and coordinate the next steps to get your discovery call locked into the schedule.\n              </p>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-top: 1px solid #e2e8f0; margin-bottom: 24px;\">\n                <tr><td></td></tr>\n              </table>\n              \n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <p style=\"margin: 0 0 4px 0; font-size: 15px; color: #334155; font-weight: 500;\">Best regards,</p>\n                    <p style=\"margin: 0 0 2px 0; font-size: 16px; color: #0f172a; font-weight: 700;\">Shaban</p>\n                    <p style=\"margin: 0; font-size: 13px; color: #64748b; line-height: 1.4;\">\n                      Founder &amp; Principal Automation Architect <br>\n                      <span style=\"color: #0f172a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px;\">Nexus Automation</span>\n                    </p>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"background-color: #f8fafc; padding: 20px 35px; text-align: center; border-top: 1px solid #e2e8f0;\">\n              <p style=\"margin: 0; font-size: 11px; color: #94a3b8;\">\n                This inquiry response process is protected and managed via Your Name Secure Engineering Pipelines.\n              </p>\n            </td>\n          </tr>\n          \n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        576,
-        400
-      ],
-      "id": "8ecb3cca-0eb1-4c31-becf-9948282c6b6c",
-      "name": "Email: Request Details",
-      "webhookId": "your-email-webhook-id-here",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credentials-id-here",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        800,
-        208
-      ],
-      "id": "32cdea77-70ea-4d3d-8d7b-0130b5e7e67b",
-      "name": "END"
-    },
-    {
-      "parameters": {
-        "sendTo": "youremail@gmail.com",
-        "subject": "=High Client Lead Alert!🔥 [High-Value Lead] {{ $json.name }} | Budget: {{ $json.property_status }}",
-        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>High Value Lead Briefing</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #334155; -webkit-font-smoothing: antialiased;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f8fafc; padding: 30px 15px;\">\n    <tr>\n      <td align=\"center\">\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width: 650px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid #e2e8f0;\">\n          \n          <tr>\n            <td style=\"background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); padding: 25px 35px; text-align: left;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <span style=\"background-color: rgba(255, 255, 255, 0.2); color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; vertical-align: middle;\">Priority 1</span>\n                    <h2 style=\"color: #ffffff; margin: 10px 0 0 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;\">🔥 New High-Value Lead Captured</h2>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"padding: 35px;\">\n              \n              <h3 style=\"margin: 0 0 15px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;\">Prospect Overview</h3>\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #f1f5f9; border-radius: 8px; margin-bottom: 30px; padding: 20px;\">\n                <tr>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #475569;\" width=\"35%\"><strong>Prospect Name:</strong></td>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #0f172a;\">{{ $json.name }}</td>\n                </tr>\n                <tr>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #475569;\"><strong>Email Address:</strong></td>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #4f46e5; font-weight: 600;\"><a href=\"mailto:{{ $json.property_email }}\" style=\"color: #4f46e5; text-decoration: none;\">{{ $json.property_email }}</a></td>\n                </tr>\n                <tr>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #475569;\"><strong>Stated Budget Tier:</strong></td>\n                  <td style=\"padding-bottom: 12px; font-size: 14px; color: #16a34a; font-weight: 700;\">💰 {{ $json.property_budget_range }}</td>\n                </tr>\n                <tr>\n                  <td style=\"font-size: 14px; color: #475569;\"><strong>Move-in Date:</strong></td>\n                  <td style=\"font-size: 14px; color: #0f172a;\">📅 {{ $json.property_move_in_date.start }}</td>\n                </tr>\n              </table>\n\n              <h3 style=\"margin: 0 0 12px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;\">Project Scope Summary</h3>\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-left: 4px solid #4f46e5; background-color: #fafafa; margin-bottom: 30px;\">\n                <tr>\n                  <td style=\"padding: 15px 20px; font-size: 14px; line-height: 1.6; color: #334155; font-style: italic;\">\n                    \"{{ $json.property_inquiry_details }}\"\n                  </td>\n                </tr>\n              </table>\n\n              <h3 style=\"margin: 0 0 15px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;\">Required Next Steps (SLA: 4 Hours)</h3>\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-bottom: 35px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px;\">\n                <tr>\n                  <td style=\"padding: 6px 0; font-size: 13px; color: #475569;\">⏹️ <strong>Step 1:</strong> Review the automated discovery payload logged in your CRM.</td>\n                </tr>\n                <tr>\n                  <td style=\"padding: 6px 0; font-size: 13px; color: #475569;\">⏹️ <strong>Step 2:</strong> Audit the prospect's corporate domain context via LinkedIn/Google.</td>\n                </tr>\n                <tr>\n                  <td style=\"padding: 6px 0; font-size: 13px; color: #475569;\">⏹️ <strong>Step 3:</strong> Draft a high-touch personalized follow-up pitch to lock in a face-to-face discovery call.</td>\n                </tr>\n              </table>\n\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td align=\"center\">\n                    <a href=\"{{ $json.url }}\" target=\"_blank\" style=\"display: inline-block; background-color: #4f46e5; color: #ffffff; font-weight: 600; font-size: 15px; padding: 14px 30px; text-decoration: none; border-radius: 6px; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3); text-transform: uppercase; letter-spacing: 0.5px;\">\n                      Open Record In CRM →\n                    </a>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n          \n          <tr>\n            <td style=\"background-color: #f8fafc; padding: 20px 35px; text-align: center; border-top: 1px solid #e2e8f0;\">\n              <p style=\"margin: 0; font-size: 11px; color: #94a3b8; letter-spacing: 0.3px;\">\n                Engineered via Your Name Systems Infrastructure.\n              </p>\n            </td>\n          </tr>\n          \n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        576,
-        208
-      ],
-      "id": "fa313bf0-15fc-49a3-99d7-4563889f9b86",
-      "name": "Instant Alert",
-      "webhookId": "your-email-webhook-id-here",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credentials-id-here",
-          "name": "Gmail account"
+        "notionApi": {
+          "id": "your-notion-credentials-id",
+          "name": "Client Form → CRM"
         }
       }
     },
@@ -196,13 +432,13 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $('Evaluate Lead Score').item.json['Lead Priority'] }}",
+                    "leftValue": "={{ $json.leadPriority }}",
                     "rightValue": "Low Budget",
                     "operator": {
                       "type": "string",
                       "operation": "equals"
                     },
-                    "id": "9de9a6a7-87a1-45dc-b865-a39c0291daa3"
+                    "id": "a9c22252-8804-4760-b39f-8e5c0b2550d2"
                   }
                 ],
                 "combinator": "and"
@@ -220,13 +456,13 @@
                 },
                 "conditions": [
                   {
-                    "id": "58461dde-0fd2-4eaa-adc4-895948a6ca22",
-                    "leftValue": "={{ $('Evaluate Lead Score').item.json['Lead Priority'] }}",
+                    "leftValue": "={{ $json.leadPriority }}",
                     "rightValue": "High Budget",
                     "operator": {
                       "type": "string",
                       "operation": "equals"
-                    }
+                    },
+                    "id": "49a535da-fe31-4601-858c-3a3787126784"
                   }
                 ],
                 "combinator": "and"
@@ -244,13 +480,13 @@
                 },
                 "conditions": [
                   {
-                    "id": "27499502-f77f-40ab-baf7-f7621921d75f",
-                    "leftValue": "={{ $('Evaluate Lead Score').item.json['Lead Priority'] }}",
+                    "leftValue": "={{ $json.leadPriority }}",
                     "rightValue": "Missing Info",
                     "operator": {
                       "type": "string",
                       "operation": "equals"
-                    }
+                    },
+                    "id": "7ffeddd6-3e2b-4749-9c6f-c867e8484f1e"
                   }
                 ],
                 "combinator": "and"
@@ -265,85 +501,124 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        352,
-        192
+        528,
+        752
       ],
-      "id": "68f926f5-1ebd-486d-a949-679ef2acddb5",
+      "id": "ba71d241-e229-4b1d-a438-0639d1ca77d3",
       "name": "Route Lead"
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "1140c4e7-4254-42fb-82ea-030742794860",
-              "name": "Name",
-              "value": "={{ $json['What is your Name?'] }}",
-              "type": "string"
-            },
-            {
-              "id": "be83f86f-8f38-42db-a563-01e8d0ca3385",
-              "name": "Email",
-              "value": "={{ $json['What’s your email address?'] }}",
-              "type": "string"
-            },
-            {
-              "id": "58721626-62fa-4009-864b-5945bf3664db",
-              "name": "Inquiry Details",
-              "value": "={{ $json['Please describe your project briefly.'] }}",
-              "type": "string"
-            },
-            {
-              "id": "ef355500-8da0-4d93-8baa-ec4f2b4ea7cc",
-              "name": "Budget Range",
-              "value": "={{ $json['What is your budget for this project?'] }}",
-              "type": "string"
-            },
-            {
-              "id": "1c37acb0-1c41-4551-b190-2d8ee398abcb",
-              "name": "Move-in Date",
-              "value": "={{ $json['When are you looking to start?'] }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
+        "sendTo": "youremail@gmail.com",
+        "subject": "Thanks for your project inquiry",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Project Inquiry Update</title>\n</head>\n\n<body style=\"margin:0; padding:0; background-color:#f4f6f8; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#334155; -webkit-font-smoothing:antialiased;\">\n\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f4f6f8; padding:40px 20px;\">\n    <tr>\n      <td align=\"center\">\n\n        <!-- Main Container -->\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width:620px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 8px 24px rgba(15,23,42,0.06);\">\n\n          <!-- Header -->\n          <tr>\n            <td style=\"background-color:#17212b; padding:28px 42px;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <div style=\"font-size:12px; font-weight:700; letter-spacing:1.6px; color:#94a3b8; text-transform:uppercase; margin-bottom:7px;\">\n                      Client Inquiry\n                    </div>\n                    <div style=\"font-size:19px; line-height:1.3; font-weight:700; letter-spacing:0.4px; color:#ffffff;\">\n                      HASHNAB AUTOMATION\n                    </div>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Accent Bar -->\n          <tr>\n            <td style=\"height:4px; background-color:#3182ce; font-size:0; line-height:0;\">\n              &nbsp;\n            </td>\n          </tr>\n\n          <!-- Content -->\n          <tr>\n            <td style=\"padding:42px;\">\n\n              <!-- Greeting -->\n              <p style=\"margin:0 0 22px 0; font-size:16px; line-height:1.6; color:#17212b;\">\n                Hi {{ $json.name || 'there' }},\n              </p>\n\n              <!-- Intro -->\n              <p style=\"margin:0 0 20px 0; font-size:15px; line-height:1.75; color:#475569;\">\n                Thank you for reaching out and sharing the details of your project. We genuinely appreciate the opportunity to learn more about what you're looking to build.\n              </p>\n\n              <!-- Qualification Message -->\n              <p style=\"margin:0 0 28px 0; font-size:15px; line-height:1.75; color:#475569;\">\n                After reviewing your submission and estimated budget, it looks like the project currently falls below our minimum engagement threshold for custom development. Our targeted automation builds typically begin at\n                <strong style=\"color:#17212b;\">$5,000</strong>.\n              </p>\n\n              <!-- Budget Summary Card -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-bottom:28px; background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;\">\n                <tr>\n                  <td style=\"padding:20px 22px;\">\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                      <tr>\n                        <td style=\"font-size:12px; font-weight:700; letter-spacing:0.7px; text-transform:uppercase; color:#64748b; padding-bottom:7px;\">\n                          Submitted Budget\n                        </td>\n                      </tr>\n                      <tr>\n                        <td style=\"font-size:18px; line-height:1.4; font-weight:700; color:#17212b;\">\n                          {{ $json.budgetRange || 'Not specified' }}\n                        </td>\n                      </tr>\n                    </table>\n                  </td>\n                </tr>\n              </table>\n\n              <!-- Recommendation -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f7fafc; border:1px solid #dbeafe; border-left:4px solid #3182ce; border-radius:7px; margin-bottom:28px;\">\n                <tr>\n                  <td style=\"padding:22px 22px 22px 20px;\">\n\n                    <div style=\"font-size:12px; line-height:1.4; font-weight:700; color:#2b6cb0; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:9px;\">\n                      Our Recommendation\n                    </div>\n\n                    <p style=\"margin:0; font-size:14px; line-height:1.7; color:#334155;\">\n                      Because we want to point you in the right direction, we recommend exploring platforms such as <strong>Upwork</strong> or reputable pre-built automation template marketplaces. These can be excellent options for getting a project launched within a smaller initial budget.\n                    </p>\n\n                  </td>\n                </tr>\n              </table>\n\n              <!-- Closing -->\n              <p style=\"margin:0 0 30px 0; font-size:15px; line-height:1.75; color:#475569;\">\n                We appreciate you considering Hashnab Automation and wish you the very best with your project. We hope our paths cross again as your automation needs grow.\n              </p>\n\n              <!-- Divider -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-bottom:26px;\">\n                <tr>\n                  <td style=\"border-top:1px solid #e2e8f0; font-size:0; line-height:0;\">\n                    &nbsp;\n                  </td>\n                </tr>\n              </table>\n\n              <!-- Signature -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <p style=\"margin:0 0 7px 0; font-size:14px; line-height:1.5; color:#64748b;\">\n                      Warm regards,\n                    </p>\n\n                    <p style=\"margin:0 0 3px 0; font-size:16px; line-height:1.4; font-weight:700; color:#17212b;\">\n                      Shaban Alam\n                    </p>\n\n                    <p style=\"margin:0 0 3px 0; font-size:13px; line-height:1.5; color:#718096;\">\n                      Founder &amp; Principal Automation Architect\n                    </p>\n\n                    <p style=\"margin:0; font-size:13px; line-height:1.5; font-weight:700; color:#3182ce;\">\n                      Hashnab Automation\n                    </p>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"background-color:#f8fafc; padding:19px 42px; border-top:1px solid #edf2f7; text-align:center;\">\n              <p style=\"margin:0; font-size:11px; line-height:1.5; color:#a0aec0; letter-spacing:0.2px;\">\n                This is an automated operational transmission from Hashnab Automation.\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>\n",
+        "options": {
+          "appendAttribution": false
+        }
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
       "position": [
-        -320,
-        208
+        752,
+        576
       ],
-      "id": "603f7c7b-372e-4739-be4d-d28464b44f9c",
-      "name": "Simplify Client Details"
+      "id": "dd6114b6-621c-41c3-98f3-9fecf778f4f7",
+      "name": "Email: Polite Redirect",
+      "webhookId": "your-gmail-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "=🔥 High-Value Lead Captured | {{ $json.name }} | {{ $json.budgetRange }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>High-Value Lead Briefing</title>\n</head>\n<body style=\"margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#334155;-webkit-font-smoothing:antialiased;\">\n  <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f8fafc;padding:30px 15px;\">\n    <tr>\n      <td align=\"center\">\n        <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width:650px;background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;\">\n\n          <!-- Header -->\n          <tr>\n            <td style=\"background-color:#4f46e5;background-image:linear-gradient(135deg,#4f46e5 0%,#3730a3 100%);padding:28px 35px;text-align:left;\">\n              <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <span style=\"display:inline-block;background-color:rgba(255,255,255,0.18);color:#ffffff;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:5px 11px;border-radius:50px;text-transform:uppercase;\">Priority 1</span>\n                    <h1 style=\"color:#ffffff;margin:12px 0 0 0;font-size:23px;line-height:1.25;font-weight:700;letter-spacing:-0.5px;\">🔥 New High-Value Lead Captured</h1>\n                    <p style=\"color:#e0e7ff;margin:8px 0 0 0;font-size:13px;line-height:1.5;\">A lead has cleared the high-budget qualification threshold and requires prompt follow-up.</p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Main content -->\n          <tr>\n            <td style=\"padding:35px;\">\n\n              <h2 style=\"margin:0 0 14px 0;font-size:13px;line-height:1.4;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;font-weight:700;\">Prospect Overview</h2>\n\n              <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:30px;\">\n                <tr>\n                  <td style=\"padding:18px 20px 10px 20px;font-size:14px;color:#475569;font-weight:600;width:35%;\">Prospect Name:</td>\n                  <td style=\"padding:18px 20px 10px 10px;font-size:14px;color:#0f172a;font-weight:600;\">{{ $json.name }}</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:8px 20px;font-size:14px;color:#475569;font-weight:600;\">Email Address:</td>\n                  <td style=\"padding:8px 20px 8px 10px;font-size:14px;color:#4f46e5;font-weight:600;word-break:break-word;\">\n                    <a href=\"mailto:{{ $json.email }}\" style=\"color:#4f46e5;text-decoration:none;\">{{ $json.email }}</a>\n                  </td>\n                </tr>\n                <tr>\n                  <td style=\"padding:8px 20px;font-size:14px;color:#475569;font-weight:600;\">Stated Budget:</td>\n                  <td style=\"padding:8px 20px 8px 10px;font-size:14px;color:#15803d;font-weight:700;\">💰 {{ $json.budgetRange }}</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:8px 20px;font-size:14px;color:#475569;font-weight:600;\">Qualification:</td>\n                  <td style=\"padding:8px 20px 8px 10px;font-size:14px;color:#15803d;font-weight:700;\">High Budget · ${{ $json.budgetMin }}+ minimum</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:8px 20px 18px 20px;font-size:14px;color:#475569;font-weight:600;\">Start Date:</td>\n                  <td style=\"padding:8px 20px 18px 10px;font-size:14px;color:#0f172a;\">📅 {{ $json.moveInDate }}</td>\n                </tr>\n              </table>\n\n              <h2 style=\"margin:0 0 12px 0;font-size:13px;line-height:1.4;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;font-weight:700;\">Project Scope Summary</h2>\n\n              <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-left:4px solid #4f46e5;background-color:#fafafa;border-top:1px solid #f1f5f9;border-right:1px solid #f1f5f9;border-bottom:1px solid #f1f5f9;margin-bottom:30px;\">\n                <tr>\n                  <td style=\"padding:17px 20px;font-size:14px;line-height:1.65;color:#334155;font-style:italic;\">\n                    “{{ $json.inquiryDetails }}”\n                  </td>\n                </tr>\n              </table>\n\n              <h2 style=\"margin:0 0 14px 0;font-size:13px;line-height:1.4;text-transform:uppercase;letter-spacing:0.8px;color:#64748b;font-weight:700;\">Required Next Steps <span style=\"text-transform:none;letter-spacing:0;color:#94a3b8;font-weight:500;\">(SLA: 4 Hours)</span></h2>\n\n              <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border:1px solid #e2e8f0;border-radius:8px;margin-bottom:32px;\">\n                <tr>\n                  <td style=\"padding:17px 20px 7px 20px;font-size:13px;line-height:1.55;color:#475569;\">🟧 <strong style=\"color:#334155;\">Step 1:</strong> Review the complete discovery payload in the CRM.</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:7px 20px;font-size:13px;line-height:1.55;color:#475569;\">🟧 <strong style=\"color:#334155;\">Step 2:</strong> Audit the prospect's company and domain context.</td>\n                </tr>\n                <tr>\n                  <td style=\"padding:7px 20px 17px 20px;font-size:13px;line-height:1.55;color:#475569;\">🟧 <strong style=\"color:#334155;\">Step 3:</strong> Prepare a personalized follow-up and secure the discovery call.</td>\n                </tr>\n              </table>\n\n              <!-- CTA -->\n              <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td align=\"center\">\n                    <a href=\"{{ $json.crmUrl }}\" target=\"_blank\" style=\"display:inline-block;background-color:#4f46e5;color:#ffffff;font-weight:700;font-size:14px;line-height:1;padding:15px 30px;text-decoration:none;border-radius:7px;letter-spacing:0.4px;text-transform:uppercase;\">Open Record in CRM →</a>\n                  </td>\n                </tr>\n              </table>\n\n              <table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-top:24px;\">\n                <tr>\n                  <td style=\"font-size:12px;line-height:1.5;color:#94a3b8;text-align:center;\">\n                    Lead source: <strong style=\"color:#64748b;\">{{ $json.source }}</strong>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"background-color:#f8fafc;padding:20px 35px;text-align:center;border-top:1px solid #e2e8f0;\">\n              <p style=\"margin:0;font-size:11px;line-height:1.5;color:#94a3b8;letter-spacing:0.3px;\">Engineered via Hashnab Automation Systems Infrastructure.</p>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        768
+      ],
+      "id": "e97e7480-42ad-4b1d-abc4-dfe5fa379507",
+      "name": "Instant Alert",
+      "webhookId": "your-gmail-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-credentials-id",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "={{ $json.emailValid ? 'A few details needed for your project inquiry' : 'Lead requires attention: missing or invalid email' }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Project Details Request</title>\n</head>\n\n<body style=\"margin:0; padding:0; background-color:#f8fafc; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#334155; -webkit-font-smoothing:antialiased;\">\n\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f8fafc; padding:40px 20px;\">\n    <tr>\n      <td align=\"center\">\n\n        <!-- Main Container -->\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"max-width:620px; background-color:#ffffff; border-radius:12px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 8px 24px rgba(15,23,42,0.05);\">\n\n          <!-- Header -->\n          <tr>\n            <td style=\"background-color:#0f172a; padding:28px 40px;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <div style=\"font-size:11px; line-height:1.4; font-weight:700; letter-spacing:1.6px; color:#94a3b8; text-transform:uppercase; margin-bottom:7px;\">\n                      Action Required\n                    </div>\n\n                    <div style=\"font-size:19px; line-height:1.35; font-weight:700; letter-spacing:0.4px; color:#ffffff;\">\n                      HASHNAB AUTOMATION\n                    </div>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Accent Bar -->\n          <tr>\n            <td style=\"height:4px; background-color:#2563eb; font-size:0; line-height:0;\">\n              &nbsp;\n            </td>\n          </tr>\n\n          <!-- Content -->\n          <tr>\n            <td style=\"padding:42px 40px 40px 40px;\">\n\n              <!-- Greeting -->\n              <p style=\"margin:0 0 22px 0; font-size:16px; line-height:1.6; font-weight:600; color:#0f172a;\">\n                Hi {{ $json.name || 'there' }},\n              </p>\n\n              <!-- Intro -->\n              <p style=\"margin:0 0 20px 0; font-size:15px; line-height:1.75; color:#334155;\">\n                Thanks for taking the time to submit your project inquiry. We’ve reviewed the information you provided and are looking forward to learning more about what you’re trying to accomplish.\n              </p>\n\n              <p style=\"margin:0 0 28px 0; font-size:15px; line-height:1.75; color:#334155;\">\n                Before we can properly evaluate the scope and determine the right solution for your project, we still need a few additional details.\n              </p>\n\n              <!-- Required Details Card -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f1f5f9; border:1px solid #e2e8f0; border-left:4px solid #2563eb; border-radius:8px; margin-bottom:28px;\">\n                <tr>\n                  <td style=\"padding:24px 22px 22px 20px;\">\n\n                    <p style=\"margin:0 0 16px 0; font-size:12px; line-height:1.4; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#475569;\">\n                      Information Still Needed\n                    </p>\n\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                      {{\n                        ($json.missingFields || []).map(field => `\n                          <tr>\n                            <td valign=\"top\" style=\"width:24px; padding:6px 8px 6px 0; font-size:14px; line-height:1.5; color:#2563eb; font-weight:700;\">\n                              &bull;\n                            </td>\n                            <td style=\"padding:6px 0; font-size:14px; line-height:1.6; color:#334155;\">\n                              <strong>${field}</strong>\n                            </td>\n                          </tr>\n                        `).join('')\n                      }}\n                    </table>\n\n                  </td>\n                </tr>\n              </table>\n\n              <!-- Response Instruction -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:30px;\">\n                <tr>\n                  <td style=\"padding:20px 22px;\">\n                    <p style=\"margin:0 0 7px 0; font-size:13px; font-weight:700; color:#0f172a;\">\n                      What to do next\n                    </p>\n\n                    <p style=\"margin:0; font-size:14px; line-height:1.7; color:#475569;\">\n                      Simply <strong style=\"color:#0f172a;\">reply directly to this email</strong> with the missing details. Once we receive them, we can continue evaluating your inquiry and determine the appropriate next steps.\n                    </p>\n                  </td>\n                </tr>\n              </table>\n\n              <!-- Closing -->\n              <p style=\"margin:0 0 30px 0; font-size:15px; line-height:1.75; color:#475569;\">\n                We appreciate your interest in working with us and look forward to hearing from you.\n              </p>\n\n              <!-- Divider -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"margin-bottom:26px;\">\n                <tr>\n                  <td style=\"border-top:1px solid #e2e8f0; font-size:0; line-height:0;\">\n                    &nbsp;\n                  </td>\n                </tr>\n              </table>\n\n              <!-- Signature -->\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td>\n                    <p style=\"margin:0 0 7px 0; font-size:14px; line-height:1.5; color:#64748b;\">\n                      Best regards,\n                    </p>\n\n                    <p style=\"margin:0 0 3px 0; font-size:16px; line-height:1.4; font-weight:700; color:#0f172a;\">\n                      Shaban Alam\n                    </p>\n\n                    <p style=\"margin:0 0 3px 0; font-size:13px; line-height:1.5; color:#64748b;\">\n                      Founder &amp; Principal Automation Architect\n                    </p>\n\n                    <p style=\"margin:0; font-size:13px; line-height:1.5; font-weight:700; color:#2563eb;\">\n                      Hashnab Automation\n                    </p>\n                  </td>\n                </tr>\n              </table>\n\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"background-color:#f8fafc; padding:19px 35px; border-top:1px solid #e2e8f0; text-align:center;\">\n              <p style=\"margin:0; font-size:11px; line-height:1.5; color:#94a3b8; letter-spacing:0.2px;\">\n                This inquiry response is automatically generated by Hashnab Automation.\n              </p>\n            </td>\n          </tr>\n\n        </table>\n\n      </td>\n    </tr>\n  </table>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        960
+      ],
+      "id": "39a31430-7e5f-46ce-b32c-3f399f934bd9",
+      "name": "Email: Request Details",
+      "webhookId": "your-gmail-webhook-id",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "your-gmail-credentials-id",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "pinData": {},
   "connections": {
-    "Catch New Lead": {
+    "Normalize Typeform Lead": {
       "main": [
         [
           {
-            "node": "Simplify Client Details",
+            "node": "Validate & Qualify Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Evaluate Lead Score": {
+    "Normalize Webhook Lead": {
       "main": [
         [
           {
-            "node": "Log Lead to CRM",
+            "node": "Validate & Qualify Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Log Lead to CRM": {
+    "Validate & Qualify Lead": {
+      "main": [
+        [
+          {
+            "node": "Has Move-in Date?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Routed Lead": {
       "main": [
         [
           {
@@ -354,33 +629,62 @@
         ]
       ]
     },
-    "Email: Polite Redirect": {
+    "Catch New Lead": {
       "main": [
         [
           {
-            "node": "END",
+            "node": "Normalize Typeform Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Email: Request Details": {
+    "Catch Leads from Webhook": {
       "main": [
         [
           {
-            "node": "END",
+            "node": "Normalize Webhook Lead",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Instant Alert": {
+    "Has Move-in Date?": {
       "main": [
         [
           {
-            "node": "END",
+            "node": "Log Lead to CRM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Lead to CRM — No Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Lead to CRM": {
+      "main": [
+        [
+          {
+            "node": "Prepare Routed Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Lead to CRM — No Date": {
+      "main": [
+        [
+          {
+            "node": "Prepare Routed Lead",
             "type": "main",
             "index": 0
           }
@@ -411,17 +715,6 @@
           }
         ]
       ]
-    },
-    "Simplify Client Details": {
-      "main": [
-        [
-          {
-            "node": "Evaluate Lead Score",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": false,
@@ -433,5 +726,6 @@
   "versionId": "",
   "meta": {},
   "nodeGroups": [],
+  "id": "",
   "tags": []
 }
