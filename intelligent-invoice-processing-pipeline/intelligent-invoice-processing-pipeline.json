@@ -156,14 +156,14 @@
           "value": "your-spreadsheet-folder-id",
           "mode": "list",
           "cachedResultName": "Invoice Processing Dashboard",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-googlesheet-folder-id/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "✅ Processed Invoices",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-googlesheet-folder-id/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -334,7 +334,7 @@
           "value": "your-spreadsheet-folder-id",
           "mode": "list",
           "cachedResultName": "Invoices_To_Process",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/your-spreadsheet-folder-id"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/your-googlesheet-folder-id"
         },
         "options": {}
       },
@@ -483,14 +483,14 @@
           "value": "your-spreadsheet-folder-id",
           "mode": "list",
           "cachedResultName": "Invoice Processing Dashboard",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-googlesheet-folder-id/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": 1196335297,
           "mode": "list",
           "cachedResultName": "⚠ Invoice Audit Log",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-spreadsheet-folder-id/edit#gid=1196335297"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/your-googlesheet-folder-id/edit#gid=1196335297"
         },
         "columns": {
           "mappingMode": "defineBelow",
