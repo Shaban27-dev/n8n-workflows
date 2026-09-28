@@ -502,7 +502,7 @@
       "name": "Append CRM Lead",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -656,7 +656,7 @@
       "name": "Append Validation Error",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -914,7 +914,7 @@
       "webhookId": "your-webhook-id-for-hot-lead-email",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credential-id",
+          "id": "your-gmail-OAuth2-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -939,7 +939,7 @@
       "webhookId": "your-webhook-id-for-warm-lead-email",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credential-id",
+          "id": "your-gmail-OAuth2-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -964,7 +964,7 @@
       "webhookId": "your-webhook-id-for-future-lead-email",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credential-id",
+          "id": "your-gmail-OAuth2-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -989,7 +989,7 @@
       "webhookId": "your-webhook-id-for-voicemail-email",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credential-id",
+          "id": "your-gmail-OAuth2-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -1014,7 +1014,7 @@
       "webhookId": "your-webhook-id-for-wrong-contact-email",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credential-id",
+          "id": "your-gmail-OAuth2-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -1039,7 +1039,7 @@
       "webhookId": "your-webhook-id-for-fallback-alert-email",
       "credentials": {
         "gmailOAuth2": {
-          "id": "your-gmail-OAuth2-credential-id",
+          "id": "your-gmail-OAuth2-credentials-id",
           "name": "Gmail account"
         }
       }
@@ -1333,7 +1333,7 @@
       "name": "Update CRM - Hot",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -1630,7 +1630,7 @@
       "name": "Update CRM - Warm",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -1926,7 +1926,7 @@
       "name": "Update CRM - Future",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -2223,7 +2223,7 @@
       "name": "Update CRM - Voicemail",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -2521,7 +2521,7 @@
       "name": "Update CRM - Wrong Contact",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -2818,7 +2818,7 @@
       "name": "Update CRM - Not Interested",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -3115,7 +3115,7 @@
       "name": "Update CRM - Do Not Call",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -3413,7 +3413,7 @@
       "name": "Update CRM - Fallback",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -3710,7 +3710,7 @@
       "name": "Update CRM - Feedback Only",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
@@ -3825,7 +3825,7 @@
       "name": "Append Workflow Errors",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "your-google-sheets-OAuth2-credential-id",
+          "id": "your-google-sheets-OAuth2-credentials-id",
           "name": "Google Sheets account"
         }
       }
